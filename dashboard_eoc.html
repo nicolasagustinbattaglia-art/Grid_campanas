@@ -892,11 +892,12 @@
 
   <!-- SUB-HOJA: SIMULACIONES -->
   <div id="simulacionesSection" style="display:none">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap">
       <span class="ctrl-label">Simulación A</span>
       <select id="selSimA"></select>
       <span class="vs-badge">VS</span>
       <select id="selSimB"></select>
+      <span style="font-size:10px;color:var(--text3)">Encabezado y métricas. El funnel y la matriz tienen su propio filtro.</span>
     </div>
 
     <div id="simHeader" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px"></div>
@@ -938,7 +939,13 @@
     </div>
 
     <div style="margin-top:24px">
-      <div class="section-label">Diferencias detectadas</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <div class="section-label" style="margin-bottom:0">Diferencias detectadas</div>
+        <select id="selFunA" style="font-size:12px;padding:4px 8px"></select>
+        <span class="vs-badge">VS</span>
+        <select id="selFunB" style="font-size:12px;padding:4px 8px"></select>
+        <span style="font-size:10px;color:var(--text3)">Aplica también al funnel de abajo.</span>
+      </div>
       <div id="simDiff"></div>
     </div>
 
@@ -1433,15 +1440,18 @@ function initSimSelectors() {
   const keys = Object.keys(SIMULACIONES);
   const a = document.getElementById('selSimA'), b = document.getElementById('selSimB');
   const ma = document.getElementById('selMatA'), mb = document.getElementById('selMatB');
+  const fa = document.getElementById('selFunA'), fb = document.getElementById('selFunB');
   if (a.options.length) return;
-  [a, b, ma, mb].forEach(sel => keys.forEach(k => sel.add(new Option(k, k))));
+  [a, b, ma, mb, fa, fb].forEach(sel => keys.forEach(k => sel.add(new Option(k, k))));
   const orig = simOriginalKey();
-  // Por defecto: la más nueva contra la original
+  // Por defecto todos arrancan igual: la más nueva contra la original
   a.value = keys[0];   b.value = orig;
   ma.value = keys[0];  mb.value = orig;
+  fa.value = keys[0];  fb.value = orig;
   [a, b].forEach(sel => sel.addEventListener('change', renderSim));
   [ma, mb, document.getElementById('selSimMatrix')]
     .forEach(sel => sel.addEventListener('change', renderSimMatrix));
+  [fa, fb].forEach(sel => sel.addEventListener('change', renderSimFunnel));
 }
 
 function simCard(sim, label, accent) {
@@ -1659,7 +1669,22 @@ function renderSim() {
   });
   renderMetrics('__SIM__', 'SIM', ka, korig, wrap(A), wrap(O), 'simMetricsRow');
 
-  // Funnel de killers: sí respeta los dos selectores de arriba
+  renderSimFunnel();
+}
+
+// Diferencias de killers + funnel con barras. Tiene su propio par de selectores porque
+// son la misma comparación vista de dos formas, y conviene poder moverla sin tocar el
+// resto de la hoja.
+function renderSimFunnel() {
+  const ka = document.getElementById('selFunA').value;
+  const kb = document.getElementById('selFunB').value;
+  const A = SIMULACIONES[ka], B = SIMULACIONES[kb];
+  if (!A || !B) return;
+
+  const wrap = s => ({
+    metrics: { SIM: s.metrics },
+    funnels: { SIM: { total: s.funnel.total_users, killers: s.killers.map(k => ({ name: k.name, accumulated: k.accumulated })) } }
+  });
   renderFunnels('__SIM__', 'SIM', ka, kb, wrap(A), wrap(B), {
     labelA: 'simFunnelLabelA', labelB: 'simFunnelLabelB',
     totalA: 'simFunnelTotalA', totalB: 'simFunnelTotalB', body: 'simFunnelBody'
