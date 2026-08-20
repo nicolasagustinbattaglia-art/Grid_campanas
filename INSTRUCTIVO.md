@@ -1237,6 +1237,7 @@ No reemplaza al flujo mensual — es una hoja aparte, con sus propios datos y su
 |---|---|---|
 | Qué compara | Mes A vs Mes B | Simulación A vs Simulación B |
 | Constante JS | `MONTHS` | `SIMULACIONES` |
+| Orden del objeto | newest-first | newest-first (la versión nueva primero) |
 | Tipo en EOC | `CAMPAIGN` | `SIMULATION` |
 | Grupos | 9 políticas | normalmente 1 grupo por corrida |
 | Grupo control | Sí (GC/GI) | **No** — `CAMPAIGN_CONTROL_GROUP` siempre false |
@@ -1291,9 +1292,20 @@ Los ratings salen de `ACTIONABLE_COLUMNS` (`INTERNAL_RATING_BEHAVIOR_TC` e
 
 Agregar la entrada a la constante `SIMULACIONES`. El label es lo que se ve en los selectores:
 
+> **⚠ Orden: newest-first.** `SIMULACIONES` va ordenado de la versión **más nueva a la más vieja**,
+> igual que `MONTHS`. La simulación nueva se inserta **primero**.
+>
+> El motivo: los selectores toman `Object.keys()[0]` como **A** y `[1]` como **B**, y todo el
+> dashboard interpreta **A = versión bajo análisis, B = base de comparación**. Con ese orden los Δ
+> se leen "nuevo vs base" y dan **positivos** cuando la versión nueva crece.
+>
+> Si se invierte el orden no se rompe nada — las etiquetas del panel de diferencias y de las cards
+> se recalculan solas a partir de los selectores — pero todos los Δ aparecen con el signo cambiado
+> y el killer eliminado se muestra como agregado. **Siempre la nueva primero.**
+
 ```js
 const SIMULACIONES = {
-  "[ID] — [etiqueta]": {          // ej: "6965 — Original"
+  "[ID] — [etiqueta]": {          // NUEVA primero. Ej: "6964 — v2"
     campaign_id: [ID],
     name: "[NOMBRE_EN_EOC]",
     exec_id: "[EXEC_ID]",
@@ -1304,11 +1316,20 @@ const SIMULACIONES = {
     metrics: { usuarios: N, lim_actual: N, lim_final: N, mult: N, exposicion: N },
     rating_matrix: { "A": { "B": { usuarios: N, lim_actual: N, lim_final: N, mult: N }, ... }, ... }
   },
-  // ... más simulaciones
+  // ... simulaciones anteriores, de más nueva a más vieja
 } ;
 ```
 
 Los selectores A/B se pueblan solos con `Object.keys(SIMULACIONES)` — no hay que tocar el HTML.
+
+**Cómo leer los resultados con esta convención:**
+
+| Sección | A (primera del objeto) | B (segunda) |
+|---|---|---|
+| Cards de métricas | valor destacado en azul | valor gris de referencia |
+| Apertura por versión | fila con los Δ | fila marcada "base de comparación" |
+| Diferencias | sólo en A → 🟢 killer **agregado** | sólo en B → 🔴 killer **eliminado** |
+| Funnel | barra azul | barra gris |
 
 ### Paso SIM-5: Validar y subir
 
@@ -1337,6 +1358,9 @@ Después subir con `file_new_version: true` sobre el `doc_id` del dashboard.
 - **`renderMetrics` y `renderFunnels` son compartidos** entre Campañas y Simulaciones. Aceptan un
   último argumento opcional con los IDs del DOM donde escribir; si se omite usan los de Campañas.
   **Al tocarlos hay que probar las dos hojas**, no sólo la que estás cambiando.
+- **Si los Δ dan todos negativos, revisá el orden de `SIMULACIONES`.** Casi siempre significa que la
+  versión vieja quedó primera y el dashboard la tomó como A. Es el error más fácil de cometer al
+  cargar una simulación nueva, y no da ningún error: los números están bien, el signo al revés.
 - **Un killer puede excluir distinto sin haber cambiado.** Si desaparece un killer previo, a los
   siguientes les entra más gente y excluyen más en absoluto. El panel de diferencias lo aclara,
   pero al interpretar los números no hay que confundir efecto cascada con cambio de lógica.
@@ -1351,6 +1375,7 @@ Después subir con `file_new_version: true` sobre el `doc_id` del dashboard.
 - [ ] Query de métricas corrida — `usuarios` coincide exacto con `users_to_impact` de EOC
 - [ ] Query de matriz de ratings corrida — suma de usuarios coherente con el total
 - [ ] Entrada agregada a `SIMULACIONES` con los 7 campos (incluye `metrics` y `rating_matrix`)
+- [ ] `SIMULACIONES` ordenado newest-first — la nueva primero, y los Δ por defecto dan positivos
 - [ ] Validación jsdom OK — ambas sub-hojas renderizan, 0 errores de JS
 - [ ] Hoja Campañas verificada sin regresiones
 - [ ] Subido al Grid con `file_new_version: true`
