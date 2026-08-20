@@ -902,24 +902,26 @@
     <div id="simHeader" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px"></div>
 
     <div style="margin-top:20px">
-      <div class="section-label">Métricas generales <span style="font-size:10px;font-weight:400;color:var(--text3)">(GC + GI)</span></div>
+      <div class="section-label">Métricas generales <span style="font-size:10px;font-weight:400;color:var(--text3)">(GC + GI · versión seleccionada vs la original)</span></div>
       <div class="metrics-row" id="simMetricsRow"></div>
     </div>
 
     <div style="margin-top:20px">
-      <div class="section-label">Apertura por versión</div>
+      <div class="section-label">Apertura por versión <span style="font-size:10px;font-weight:400;color:var(--text3)">(historial completo · Δ contra la original)</span></div>
       <div class="panel-wrap"><div class="panel-inner">
         <table class="nise-table" id="simAperturaTable"></table>
       </div></div>
     </div>
 
     <div style="margin-top:20px">
-      <div class="section-label">Resumen del funnel</div>
-      <div id="simResumen" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px"></div>
+      <div class="section-label">Resumen del funnel <span style="font-size:10px;font-weight:400;color:var(--text3)">(historial completo)</span></div>
+      <div class="panel-wrap"><div class="panel-inner">
+        <table class="nise-table" id="simResumenTable"></table>
+      </div></div>
     </div>
 
     <div style="margin-top:24px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <div class="section-label" style="margin-bottom:0">Matriz de ratings (BHV × Upsell)</div>
         <select id="selSimMatrix" style="font-size:12px;padding:4px 8px">
           <option value="pct">% de clientes</option>
@@ -927,6 +929,10 @@
           <option value="lim_actual">Límite actual avg</option>
           <option value="mult">Multiplicador avg</option>
         </select>
+        <span style="width:1px;height:20px;background:var(--border2)"></span>
+        <select id="selMatA" style="font-size:12px;padding:4px 8px"></select>
+        <span class="vs-badge">VS</span>
+        <select id="selMatB" style="font-size:12px;padding:4px 8px"></select>
       </div>
       <div id="simMatrix"></div>
     </div>
@@ -1078,7 +1084,7 @@ const selMonthB = document.getElementById('selMonthB');
 
 
 // ===== SIMULACIONES =====
-const SIMULACIONES = {"6964 — v2": {"campaign_id": 6964, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC", "exec_id": "e661a9d0-69f6-4a37-9c19-74de68d550c6", "group_name": "RIESGO MED. SOW", "funnel": {"total_users": 21221355, "excluded_by_rules": 20262442, "excluded_by_policy": 889024, "users_to_impact": 69889}, "killers": [{"name": "K-TC-STATUS_DIF_ACCEPTED", "excluded": 181345, "accumulated": 21040010}, {"name": "K-TC-LIMIT_ACTUAL_MENOR_500", "excluded": 4110090, "accumulated": 16929920}, {"name": "K-TC-CUENTA_NO_ACTIVA", "excluded": 4934630, "accumulated": 11995290}, {"name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D", "excluded": 1863705, "accumulated": 10131585}, {"name": "K-SIN-INGRESOS", "excluded": 3050, "accumulated": 10128535}, {"name": "K-BLACKLIST", "excluded": 16271, "accumulated": 10112264}, {"name": "K-RESTRICCIONES_MELI", "excluded": 41383, "accumulated": 10070881}, {"name": "K-CC_PROPOSAL_MISTAKE", "excluded": 141908, "accumulated": 9928973}, {"name": "K-TC-PERMANENTEMENTE_BLOQUEADO", "excluded": 40507, "accumulated": 9888466}, {"name": "K-TC-TRANSICIONAL_BLOQUEADO", "excluded": 35, "accumulated": 9888431}, {"name": "K-RESTRUCTURACION_DEUDA", "excluded": 10169, "accumulated": 9878262}, {"name": "K-SIN_CPF", "excluded": 146057, "accumulated": 9732205}, {"name": "K-MENOR_EDAD", "excluded": 210, "accumulated": 9731995}, {"name": "K-FLAG_OVERDUE", "excluded": 520073, "accumulated": 9211922}, {"name": "K-ATRASO_OPF", "excluded": 324536, "accumulated": 8887386}, {"name": "K-TC-STATUS_CANCELADA", "excluded": 172040, "accumulated": 8715346}, {"name": "K-TC-DESACTIVADA_OFERTAS_UPSELL", "excluded": 39228, "accumulated": 8676118}, {"name": "K-ATRASO-SCR", "excluded": 172833, "accumulated": 8503285}, {"name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10", "excluded": 104651, "accumulated": 8398634}, {"name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT", "excluded": 245977, "accumulated": 8152657}, {"name": "K-RATING_EXTERNO_G_NULL", "excluded": 81095, "accumulated": 8071562}, {"name": "K-TC-S-ULTIMO_SCORE_BHV", "excluded": 821611, "accumulated": 7249951}, {"name": "K-NO-PAGO-TOTAL-ADELANTADO-TC", "excluded": 218493, "accumulated": 7031458}, {"name": "K-90D_ULT_DOWNSELL_LC", "excluded": 0, "accumulated": 7031458}, {"name": "K-LC-60D_RECENTLY_CREATED", "excluded": 221324, "accumulated": 6810134}, {"name": "K-SEL-ESTADO-1ER-CUOTA-CF", "excluded": 53442, "accumulated": 6756692}, {"name": "K-SEL-ATRASO-CF-90D-EVER", "excluded": 2432, "accumulated": 6754260}, {"name": "K-90D_ULT_DOWNSELL_TC", "excluded": 188270, "accumulated": 6565990}, {"name": "K-MLB-360D-ULT-PIX-APUESTAS", "excluded": 655604, "accumulated": 5910386}, {"name": "K-MLB-USE-PIX-SALDO-PCT", "excluded": 90863, "accumulated": 5819523}, {"name": "K-USO-SEGURO-PARA-PAGO-TC", "excluded": 1762, "accumulated": 5817761}, {"name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M", "excluded": 555770, "accumulated": 5261991}, {"name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M", "excluded": 745598, "accumulated": 4516393}, {"name": "K-120D_ULT_UPSELL_TC_ANTIG_24M", "excluded": 753911, "accumulated": 3762482}, {"name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200", "excluded": 684393, "accumulated": 3078089}, {"name": "K-PORC-USO-TC-MIM-POR-ANTIG-4M-18M", "excluded": 1376531, "accumulated": 1701558}, {"name": "K-SELLERS-2", "excluded": 221930, "accumulated": 1479628}, {"name": "K-365D-ULT-REJECTED_AUTOFUND", "excluded": 15905, "accumulated": 1463723}, {"name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO", "excluded": 3219, "accumulated": 1460504}, {"name": "K-MLB-CLUSTER-VOLATIL-F-G", "excluded": 88364, "accumulated": 1372140}, {"name": "K-USER_DOWNSELL_MXP_FLAG_TC", "excluded": 0, "accumulated": 1372140}, {"name": "K-DETERIORO_CARTERA_GRUPO", "excluded": 4309, "accumulated": 1367831}, {"name": "K-MLB_CC_ULT_ORIGINACION_120D", "excluded": 366675, "accumulated": 1001156}, {"name": "K-CREDITO-DE-ACTIVO", "excluded": 124, "accumulated": 1001032}, {"name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI", "excluded": 42119, "accumulated": 958913}], "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6964?executionId=e661a9d0-69f6-4a37-9c19-74de68d550c6&tab=campaign", "metrics": {"usuarios": 69889, "lim_actual": 6946, "lim_final": 7827, "mult": 1.13, "exposicion": 61568333}, "rating_matrix": {"A": {"D": {"usuarios": 2012, "lim_actual": 8139.0, "lim_final": 9429.0, "mult": 1.164}}, "B": {"D": {"usuarios": 6437, "lim_actual": 7500.0, "lim_final": 8669.0, "mult": 1.163}}, "C": {"D": {"usuarios": 25443, "lim_actual": 6936.0, "lim_final": 7817.0, "mult": 1.128}}, "D": {"A": {"usuarios": 3, "lim_actual": 6173.0, "lim_final": 7067.0, "mult": 1.249}, "B": {"usuarios": 445, "lim_actual": 8388.0, "lim_final": 9420.0, "mult": 1.127}, "C": {"usuarios": 9263, "lim_actual": 7567.0, "lim_final": 8440.0, "mult": 1.117}, "D": {"usuarios": 21230, "lim_actual": 6577.0, "lim_final": 7372.0, "mult": 1.123}}, "E": {"B": {"usuarios": 18, "lim_actual": 8667.0, "lim_final": 9494.0, "mult": 1.099}, "C": {"usuarios": 713, "lim_actual": 7147.0, "lim_final": 7965.0, "mult": 1.118}, "D": {"usuarios": 4325, "lim_actual": 5925.0, "lim_final": 6619.0, "mult": 1.122}}}}, "6965 — Original": {"campaign_id": 6965, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC ORIGINAL", "exec_id": "4ec90a34-1f9f-46c3-a4b8-01f7dbbb679e", "group_name": "RIESGO MED. SOW", "funnel": {"total_users": 21221355, "excluded_by_rules": 20899368, "excluded_by_policy": 308059, "users_to_impact": 13928}, "killers": [{"name": "K-TC-STATUS_DIF_ACCEPTED", "excluded": 181345, "accumulated": 21040010}, {"name": "K-TC-LIMIT_ACTUAL_MENOR_500", "excluded": 4110090, "accumulated": 16929920}, {"name": "K-TC-CUENTA_NO_ACTIVA", "excluded": 4934630, "accumulated": 11995290}, {"name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D", "excluded": 1863705, "accumulated": 10131585}, {"name": "K-SIN-INGRESOS", "excluded": 3050, "accumulated": 10128535}, {"name": "K-BLACKLIST", "excluded": 16271, "accumulated": 10112264}, {"name": "K-RESTRICCIONES_MELI", "excluded": 41383, "accumulated": 10070881}, {"name": "K-CC_PROPOSAL_MISTAKE", "excluded": 141908, "accumulated": 9928973}, {"name": "K-TC-PERMANENTEMENTE_BLOQUEADO", "excluded": 40507, "accumulated": 9888466}, {"name": "K-TC-TRANSICIONAL_BLOQUEADO", "excluded": 35, "accumulated": 9888431}, {"name": "K-RESTRUCTURACION_DEUDA", "excluded": 10169, "accumulated": 9878262}, {"name": "K-SIN_CPF", "excluded": 146057, "accumulated": 9732205}, {"name": "K-MENOR_EDAD", "excluded": 210, "accumulated": 9731995}, {"name": "K-FLAG_OVERDUE", "excluded": 520073, "accumulated": 9211922}, {"name": "K-ATRASO_OPF", "excluded": 324536, "accumulated": 8887386}, {"name": "K-TC-STATUS_CANCELADA", "excluded": 172040, "accumulated": 8715346}, {"name": "K-TC-DESACTIVADA_OFERTAS_UPSELL", "excluded": 39228, "accumulated": 8676118}, {"name": "K-ATRASO-SCR", "excluded": 172833, "accumulated": 8503285}, {"name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10", "excluded": 104651, "accumulated": 8398634}, {"name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT", "excluded": 245977, "accumulated": 8152657}, {"name": "K-RATING_EXTERNO_G_NULL", "excluded": 81095, "accumulated": 8071562}, {"name": "K-TC-S-ULTIMO_SCORE_BHV", "excluded": 821611, "accumulated": 7249951}, {"name": "K-NO-PAGO-TOTAL-ADELANTADO-TC", "excluded": 218493, "accumulated": 7031458}, {"name": "K-90D_ULT_DOWNSELL_LC", "excluded": 0, "accumulated": 7031458}, {"name": "K-LC-60D_RECENTLY_CREATED", "excluded": 221324, "accumulated": 6810134}, {"name": "K-SEL-ESTADO-1ER-CUOTA-CF", "excluded": 53442, "accumulated": 6756692}, {"name": "K-SEL-ATRASO-CF-90D-EVER", "excluded": 2432, "accumulated": 6754260}, {"name": "K-90D_ULT_DOWNSELL_TC", "excluded": 188270, "accumulated": 6565990}, {"name": "K-MLB-360D-ULT-PIX-APUESTAS", "excluded": 655604, "accumulated": 5910386}, {"name": "K-MLB-USE-PIX-SALDO-PCT", "excluded": 90863, "accumulated": 5819523}, {"name": "K-USO-SEGURO-PARA-PAGO-TC", "excluded": 1762, "accumulated": 5817761}, {"name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M", "excluded": 555770, "accumulated": 5261991}, {"name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M", "excluded": 745598, "accumulated": 4516393}, {"name": "K-120D_ULT_UPSELL_TC_ANTIG_24M", "excluded": 753911, "accumulated": 3762482}, {"name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200", "excluded": 684393, "accumulated": 3078089}, {"name": "K-PORC-USO-TC-MIM-POR-ANTIG-4M-18M", "excluded": 1376531, "accumulated": 1701558}, {"name": "K-SELLERS-2", "excluded": 221930, "accumulated": 1479628}, {"name": "K-365D-ULT-REJECTED_AUTOFUND", "excluded": 15905, "accumulated": 1463723}, {"name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO", "excluded": 3219, "accumulated": 1460504}, {"name": "K-MLB-CLUSTER-VOLATIL-F-G", "excluded": 88364, "accumulated": 1372140}, {"name": "K-USER_DOWNSELL_MXP_FLAG_TC", "excluded": 0, "accumulated": 1372140}, {"name": "K-MLB-RATING_CAPTURA_SALDO", "excluded": 856078, "accumulated": 516062}, {"name": "K-DETERIORO_CARTERA_GRUPO", "excluded": 2591, "accumulated": 513471}, {"name": "K-MLB_CC_ULT_ORIGINACION_120D", "excluded": 170109, "accumulated": 343362}, {"name": "K-CREDITO-DE-ACTIVO", "excluded": 79, "accumulated": 343283}, {"name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI", "excluded": 21296, "accumulated": 321987}], "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6965?executionId=4ec90a34-1f9f-46c3-a4b8-01f7dbbb679e&tab=campaign", "metrics": {"usuarios": 13928, "lim_actual": 5120, "lim_final": 5729, "mult": 1.12, "exposicion": 8484981}, "rating_matrix": {"A": {"D": {"usuarios": 488, "lim_actual": 5930.0, "lim_final": 6821.0, "mult": 1.155}}, "B": {"D": {"usuarios": 1069, "lim_actual": 5843.0, "lim_final": 6676.0, "mult": 1.15}}, "C": {"D": {"usuarios": 4323, "lim_actual": 5228.0, "lim_final": 5857.0, "mult": 1.123}}, "D": {"B": {"usuarios": 135, "lim_actual": 5572.0, "lim_final": 6181.0, "mult": 1.113}, "C": {"usuarios": 1937, "lim_actual": 5360.0, "lim_final": 5933.0, "mult": 1.11}, "D": {"usuarios": 4762, "lim_actual": 4791.0, "lim_final": 5340.0, "mult": 1.118}}, "E": {"B": {"usuarios": 8, "lim_actual": 7863.0, "lim_final": 8850.0, "mult": 1.105}, "C": {"usuarios": 177, "lim_actual": 5359.0, "lim_final": 5920.0, "mult": 1.11}, "D": {"usuarios": 1029, "lim_actual": 4481.0, "lim_final": 4995.0, "mult": 1.119}}}}} ;
+const SIMULACIONES = {"6969 — v4": {"campaign_id": 6969, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC v4", "exec_id": "e08c233b-0343-405b-8fa5-a9f25f5f4085", "group_name": "RIESGO MED. SOW", "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6969?executionId=e08c233b-0343-405b-8fa5-a9f25f5f4085&tab=campaign", "funnel": {"total_users": 21237383, "excluded_by_rules": 20450899, "excluded_by_policy": 725008, "users_to_impact": 61476}, "killers": [{"name": "K-TC-STATUS_DIF_ACCEPTED", "excluded": 197374, "accumulated": 21040009}, {"name": "K-TC-LIMIT_ACTUAL_MENOR_500", "excluded": 4110090, "accumulated": 16929919}, {"name": "K-TC-CUENTA_NO_ACTIVA", "excluded": 4934629, "accumulated": 11995290}, {"name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D", "excluded": 1862559, "accumulated": 10132731}, {"name": "K-SIN-INGRESOS", "excluded": 3050, "accumulated": 10129681}, {"name": "K-BLACKLIST", "excluded": 16271, "accumulated": 10113410}, {"name": "K-RESTRICCIONES_MELI", "excluded": 41508, "accumulated": 10071902}, {"name": "K-CC_PROPOSAL_MISTAKE", "excluded": 141913, "accumulated": 9929989}, {"name": "K-TC-PERMANENTEMENTE_BLOQUEADO", "excluded": 40515, "accumulated": 9889474}, {"name": "K-TC-TRANSICIONAL_BLOQUEADO", "excluded": 35, "accumulated": 9889439}, {"name": "K-RESTRUCTURACION_DEUDA", "excluded": 10175, "accumulated": 9879264}, {"name": "K-SIN_CPF", "excluded": 146024, "accumulated": 9733240}, {"name": "K-MENOR_EDAD", "excluded": 206, "accumulated": 9733034}, {"name": "K-FLAG_OVERDUE", "excluded": 520233, "accumulated": 9212801}, {"name": "K-ATRASO_OPF", "excluded": 324601, "accumulated": 8888200}, {"name": "K-TC-STATUS_CANCELADA", "excluded": 172039, "accumulated": 8716161}, {"name": "K-TC-DESACTIVADA_OFERTAS_UPSELL", "excluded": 39248, "accumulated": 8676913}, {"name": "K-ATRASO-SCR", "excluded": 172878, "accumulated": 8504035}, {"name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10", "excluded": 104660, "accumulated": 8399375}, {"name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT", "excluded": 246002, "accumulated": 8153373}, {"name": "K-RATING_EXTERNO_G_NULL", "excluded": 81123, "accumulated": 8072250}, {"name": "K-TC-S-ULTIMO_SCORE_BHV", "excluded": 821613, "accumulated": 7250637}, {"name": "K-NO-PAGO-TOTAL-ADELANTADO-TC", "excluded": 218501, "accumulated": 7032136}, {"name": "K-90D_ULT_DOWNSELL_LC", "excluded": 0, "accumulated": 7032136}, {"name": "K-LC-60D_RECENTLY_CREATED", "excluded": 218168, "accumulated": 6813968}, {"name": "K-SEL-ESTADO-1ER-CUOTA-CF", "excluded": 53464, "accumulated": 6760504}, {"name": "K-SEL-ATRASO-CF-90D-EVER", "excluded": 2434, "accumulated": 6758070}, {"name": "K-90D_ULT_DOWNSELL_TC", "excluded": 188321, "accumulated": 6569749}, {"name": "K-MLB-360D-ULT-PIX-APUESTAS", "excluded": 655372, "accumulated": 5914377}, {"name": "K-MLB-USE-PIX-SALDO-PCT", "excluded": 90990, "accumulated": 5823387}, {"name": "K-USO-SEGURO-PARA-PAGO-TC", "excluded": 1762, "accumulated": 5821625}, {"name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M", "excluded": 555920, "accumulated": 5265705}, {"name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M", "excluded": 745785, "accumulated": 4519920}, {"name": "K-120D_ULT_UPSELL_TC_ANTIG_24M", "excluded": 715737, "accumulated": 3804183}, {"name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200", "excluded": 687303, "accumulated": 3116880}, {"name": "K-PORC-USO-TC-MIM-POR-ANTIG-ATEN-4M-18M", "excluded": 1640368, "accumulated": 1476512}, {"name": "K-SELLERS-2", "excluded": 211374, "accumulated": 1265138}, {"name": "K-365D-ULT-REJECTED_AUTOFUND", "excluded": 15431, "accumulated": 1249707}, {"name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO", "excluded": 2928, "accumulated": 1246779}, {"name": "K-MLB-CLUSTER-VOLATIL-F-G", "excluded": 81482, "accumulated": 1165297}, {"name": "K-USER_DOWNSELL_MXP_FLAG_TC", "excluded": 0, "accumulated": 1165297}, {"name": "K-DETERIORO_CARTERA_GRUPO", "excluded": 4141, "accumulated": 1161156}, {"name": "K-MLB_CC_ULT_ORIGINACION_120D", "excluded": 336249, "accumulated": 824907}, {"name": "K-CREDITO-DE-ACTIVO", "excluded": 127, "accumulated": 824780}, {"name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI", "excluded": 38296, "accumulated": 786484}], "metrics": {"usuarios": 61476, "lim_actual": 6754, "lim_final": 7604, "mult": 1.13, "exposicion": 52282424}, "rating_matrix": {"A": {"D": {"usuarios": 1742, "lim_actual": 7953.0, "lim_final": 9214.0, "mult": 1.163}}, "B": {"D": {"usuarios": 5221, "lim_actual": 7247.0, "lim_final": 8349.0, "mult": 1.161}}, "C": {"D": {"usuarios": 21755, "lim_actual": 6719.0, "lim_final": 7572.0, "mult": 1.128}}, "D": {"A": {"usuarios": 3, "lim_actual": 6173.0, "lim_final": 7067.0, "mult": 1.249}, "B": {"usuarios": 403, "lim_actual": 8311.0, "lim_final": 9343.0, "mult": 1.127}, "C": {"usuarios": 8354, "lim_actual": 7372.0, "lim_final": 8223.0, "mult": 1.117}, "D": {"usuarios": 19283, "lim_actual": 6436.0, "lim_final": 7212.0, "mult": 1.123}}, "E": {"B": {"usuarios": 17, "lim_actual": 8765.0, "lim_final": 9600.0, "mult": 1.099}, "C": {"usuarios": 650, "lim_actual": 6946.0, "lim_final": 7732.0, "mult": 1.118}, "D": {"usuarios": 4048, "lim_actual": 5834.0, "lim_final": 6515.0, "mult": 1.122}}}}, "6964 — v2": {"campaign_id": 6964, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC", "exec_id": "e661a9d0-69f6-4a37-9c19-74de68d550c6", "group_name": "RIESGO MED. SOW", "funnel": {"total_users": 21221355, "excluded_by_rules": 20262442, "excluded_by_policy": 889024, "users_to_impact": 69889}, "killers": [{"name": "K-TC-STATUS_DIF_ACCEPTED", "excluded": 181345, "accumulated": 21040010}, {"name": "K-TC-LIMIT_ACTUAL_MENOR_500", "excluded": 4110090, "accumulated": 16929920}, {"name": "K-TC-CUENTA_NO_ACTIVA", "excluded": 4934630, "accumulated": 11995290}, {"name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D", "excluded": 1863705, "accumulated": 10131585}, {"name": "K-SIN-INGRESOS", "excluded": 3050, "accumulated": 10128535}, {"name": "K-BLACKLIST", "excluded": 16271, "accumulated": 10112264}, {"name": "K-RESTRICCIONES_MELI", "excluded": 41383, "accumulated": 10070881}, {"name": "K-CC_PROPOSAL_MISTAKE", "excluded": 141908, "accumulated": 9928973}, {"name": "K-TC-PERMANENTEMENTE_BLOQUEADO", "excluded": 40507, "accumulated": 9888466}, {"name": "K-TC-TRANSICIONAL_BLOQUEADO", "excluded": 35, "accumulated": 9888431}, {"name": "K-RESTRUCTURACION_DEUDA", "excluded": 10169, "accumulated": 9878262}, {"name": "K-SIN_CPF", "excluded": 146057, "accumulated": 9732205}, {"name": "K-MENOR_EDAD", "excluded": 210, "accumulated": 9731995}, {"name": "K-FLAG_OVERDUE", "excluded": 520073, "accumulated": 9211922}, {"name": "K-ATRASO_OPF", "excluded": 324536, "accumulated": 8887386}, {"name": "K-TC-STATUS_CANCELADA", "excluded": 172040, "accumulated": 8715346}, {"name": "K-TC-DESACTIVADA_OFERTAS_UPSELL", "excluded": 39228, "accumulated": 8676118}, {"name": "K-ATRASO-SCR", "excluded": 172833, "accumulated": 8503285}, {"name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10", "excluded": 104651, "accumulated": 8398634}, {"name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT", "excluded": 245977, "accumulated": 8152657}, {"name": "K-RATING_EXTERNO_G_NULL", "excluded": 81095, "accumulated": 8071562}, {"name": "K-TC-S-ULTIMO_SCORE_BHV", "excluded": 821611, "accumulated": 7249951}, {"name": "K-NO-PAGO-TOTAL-ADELANTADO-TC", "excluded": 218493, "accumulated": 7031458}, {"name": "K-90D_ULT_DOWNSELL_LC", "excluded": 0, "accumulated": 7031458}, {"name": "K-LC-60D_RECENTLY_CREATED", "excluded": 221324, "accumulated": 6810134}, {"name": "K-SEL-ESTADO-1ER-CUOTA-CF", "excluded": 53442, "accumulated": 6756692}, {"name": "K-SEL-ATRASO-CF-90D-EVER", "excluded": 2432, "accumulated": 6754260}, {"name": "K-90D_ULT_DOWNSELL_TC", "excluded": 188270, "accumulated": 6565990}, {"name": "K-MLB-360D-ULT-PIX-APUESTAS", "excluded": 655604, "accumulated": 5910386}, {"name": "K-MLB-USE-PIX-SALDO-PCT", "excluded": 90863, "accumulated": 5819523}, {"name": "K-USO-SEGURO-PARA-PAGO-TC", "excluded": 1762, "accumulated": 5817761}, {"name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M", "excluded": 555770, "accumulated": 5261991}, {"name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M", "excluded": 745598, "accumulated": 4516393}, {"name": "K-120D_ULT_UPSELL_TC_ANTIG_24M", "excluded": 753911, "accumulated": 3762482}, {"name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200", "excluded": 684393, "accumulated": 3078089}, {"name": "K-PORC-USO-TC-MIM-POR-ANTIG-4M-18M", "excluded": 1376531, "accumulated": 1701558}, {"name": "K-SELLERS-2", "excluded": 221930, "accumulated": 1479628}, {"name": "K-365D-ULT-REJECTED_AUTOFUND", "excluded": 15905, "accumulated": 1463723}, {"name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO", "excluded": 3219, "accumulated": 1460504}, {"name": "K-MLB-CLUSTER-VOLATIL-F-G", "excluded": 88364, "accumulated": 1372140}, {"name": "K-USER_DOWNSELL_MXP_FLAG_TC", "excluded": 0, "accumulated": 1372140}, {"name": "K-DETERIORO_CARTERA_GRUPO", "excluded": 4309, "accumulated": 1367831}, {"name": "K-MLB_CC_ULT_ORIGINACION_120D", "excluded": 366675, "accumulated": 1001156}, {"name": "K-CREDITO-DE-ACTIVO", "excluded": 124, "accumulated": 1001032}, {"name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI", "excluded": 42119, "accumulated": 958913}], "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6964?executionId=e661a9d0-69f6-4a37-9c19-74de68d550c6&tab=campaign", "metrics": {"usuarios": 69889, "lim_actual": 6946, "lim_final": 7827, "mult": 1.13, "exposicion": 61568333}, "rating_matrix": {"A": {"D": {"usuarios": 2012, "lim_actual": 8139.0, "lim_final": 9429.0, "mult": 1.164}}, "B": {"D": {"usuarios": 6437, "lim_actual": 7500.0, "lim_final": 8669.0, "mult": 1.163}}, "C": {"D": {"usuarios": 25443, "lim_actual": 6936.0, "lim_final": 7817.0, "mult": 1.128}}, "D": {"A": {"usuarios": 3, "lim_actual": 6173.0, "lim_final": 7067.0, "mult": 1.249}, "B": {"usuarios": 445, "lim_actual": 8388.0, "lim_final": 9420.0, "mult": 1.127}, "C": {"usuarios": 9263, "lim_actual": 7567.0, "lim_final": 8440.0, "mult": 1.117}, "D": {"usuarios": 21230, "lim_actual": 6577.0, "lim_final": 7372.0, "mult": 1.123}}, "E": {"B": {"usuarios": 18, "lim_actual": 8667.0, "lim_final": 9494.0, "mult": 1.099}, "C": {"usuarios": 713, "lim_actual": 7147.0, "lim_final": 7965.0, "mult": 1.118}, "D": {"usuarios": 4325, "lim_actual": 5925.0, "lim_final": 6619.0, "mult": 1.122}}}}, "6965 — Original": {"campaign_id": 6965, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC ORIGINAL", "exec_id": "4ec90a34-1f9f-46c3-a4b8-01f7dbbb679e", "group_name": "RIESGO MED. SOW", "funnel": {"total_users": 21221355, "excluded_by_rules": 20899368, "excluded_by_policy": 308059, "users_to_impact": 13928}, "killers": [{"name": "K-TC-STATUS_DIF_ACCEPTED", "excluded": 181345, "accumulated": 21040010}, {"name": "K-TC-LIMIT_ACTUAL_MENOR_500", "excluded": 4110090, "accumulated": 16929920}, {"name": "K-TC-CUENTA_NO_ACTIVA", "excluded": 4934630, "accumulated": 11995290}, {"name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D", "excluded": 1863705, "accumulated": 10131585}, {"name": "K-SIN-INGRESOS", "excluded": 3050, "accumulated": 10128535}, {"name": "K-BLACKLIST", "excluded": 16271, "accumulated": 10112264}, {"name": "K-RESTRICCIONES_MELI", "excluded": 41383, "accumulated": 10070881}, {"name": "K-CC_PROPOSAL_MISTAKE", "excluded": 141908, "accumulated": 9928973}, {"name": "K-TC-PERMANENTEMENTE_BLOQUEADO", "excluded": 40507, "accumulated": 9888466}, {"name": "K-TC-TRANSICIONAL_BLOQUEADO", "excluded": 35, "accumulated": 9888431}, {"name": "K-RESTRUCTURACION_DEUDA", "excluded": 10169, "accumulated": 9878262}, {"name": "K-SIN_CPF", "excluded": 146057, "accumulated": 9732205}, {"name": "K-MENOR_EDAD", "excluded": 210, "accumulated": 9731995}, {"name": "K-FLAG_OVERDUE", "excluded": 520073, "accumulated": 9211922}, {"name": "K-ATRASO_OPF", "excluded": 324536, "accumulated": 8887386}, {"name": "K-TC-STATUS_CANCELADA", "excluded": 172040, "accumulated": 8715346}, {"name": "K-TC-DESACTIVADA_OFERTAS_UPSELL", "excluded": 39228, "accumulated": 8676118}, {"name": "K-ATRASO-SCR", "excluded": 172833, "accumulated": 8503285}, {"name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10", "excluded": 104651, "accumulated": 8398634}, {"name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT", "excluded": 245977, "accumulated": 8152657}, {"name": "K-RATING_EXTERNO_G_NULL", "excluded": 81095, "accumulated": 8071562}, {"name": "K-TC-S-ULTIMO_SCORE_BHV", "excluded": 821611, "accumulated": 7249951}, {"name": "K-NO-PAGO-TOTAL-ADELANTADO-TC", "excluded": 218493, "accumulated": 7031458}, {"name": "K-90D_ULT_DOWNSELL_LC", "excluded": 0, "accumulated": 7031458}, {"name": "K-LC-60D_RECENTLY_CREATED", "excluded": 221324, "accumulated": 6810134}, {"name": "K-SEL-ESTADO-1ER-CUOTA-CF", "excluded": 53442, "accumulated": 6756692}, {"name": "K-SEL-ATRASO-CF-90D-EVER", "excluded": 2432, "accumulated": 6754260}, {"name": "K-90D_ULT_DOWNSELL_TC", "excluded": 188270, "accumulated": 6565990}, {"name": "K-MLB-360D-ULT-PIX-APUESTAS", "excluded": 655604, "accumulated": 5910386}, {"name": "K-MLB-USE-PIX-SALDO-PCT", "excluded": 90863, "accumulated": 5819523}, {"name": "K-USO-SEGURO-PARA-PAGO-TC", "excluded": 1762, "accumulated": 5817761}, {"name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M", "excluded": 555770, "accumulated": 5261991}, {"name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M", "excluded": 745598, "accumulated": 4516393}, {"name": "K-120D_ULT_UPSELL_TC_ANTIG_24M", "excluded": 753911, "accumulated": 3762482}, {"name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200", "excluded": 684393, "accumulated": 3078089}, {"name": "K-PORC-USO-TC-MIM-POR-ANTIG-4M-18M", "excluded": 1376531, "accumulated": 1701558}, {"name": "K-SELLERS-2", "excluded": 221930, "accumulated": 1479628}, {"name": "K-365D-ULT-REJECTED_AUTOFUND", "excluded": 15905, "accumulated": 1463723}, {"name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO", "excluded": 3219, "accumulated": 1460504}, {"name": "K-MLB-CLUSTER-VOLATIL-F-G", "excluded": 88364, "accumulated": 1372140}, {"name": "K-USER_DOWNSELL_MXP_FLAG_TC", "excluded": 0, "accumulated": 1372140}, {"name": "K-MLB-RATING_CAPTURA_SALDO", "excluded": 856078, "accumulated": 516062}, {"name": "K-DETERIORO_CARTERA_GRUPO", "excluded": 2591, "accumulated": 513471}, {"name": "K-MLB_CC_ULT_ORIGINACION_120D", "excluded": 170109, "accumulated": 343362}, {"name": "K-CREDITO-DE-ACTIVO", "excluded": 79, "accumulated": 343283}, {"name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI", "excluded": 21296, "accumulated": 321987}], "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6965?executionId=4ec90a34-1f9f-46c3-a4b8-01f7dbbb679e&tab=campaign", "metrics": {"usuarios": 13928, "lim_actual": 5120, "lim_final": 5729, "mult": 1.12, "exposicion": 8484981}, "rating_matrix": {"A": {"D": {"usuarios": 488, "lim_actual": 5930.0, "lim_final": 6821.0, "mult": 1.155}}, "B": {"D": {"usuarios": 1069, "lim_actual": 5843.0, "lim_final": 6676.0, "mult": 1.15}}, "C": {"D": {"usuarios": 4323, "lim_actual": 5228.0, "lim_final": 5857.0, "mult": 1.123}}, "D": {"B": {"usuarios": 135, "lim_actual": 5572.0, "lim_final": 6181.0, "mult": 1.113}, "C": {"usuarios": 1937, "lim_actual": 5360.0, "lim_final": 5933.0, "mult": 1.11}, "D": {"usuarios": 4762, "lim_actual": 4791.0, "lim_final": 5340.0, "mult": 1.118}}, "E": {"B": {"usuarios": 8, "lim_actual": 7863.0, "lim_final": 8850.0, "mult": 1.105}, "C": {"usuarios": 177, "lim_actual": 5359.0, "lim_final": 5920.0, "mult": 1.11}, "D": {"usuarios": 1029, "lim_actual": 4481.0, "lim_final": 4995.0, "mult": 1.119}}}, "es_original": true}} ;
 
 const ALL_SECTION_IDS = ['campaignHeader','consolidadoSection','metricsSection','commentsSection',
   'funnelSection','distSection','gcSection','dimSection','killerSearchSection'];
@@ -1426,16 +1432,16 @@ function renderHistorial() {
 function initSimSelectors() {
   const keys = Object.keys(SIMULACIONES);
   const a = document.getElementById('selSimA'), b = document.getElementById('selSimB');
+  const ma = document.getElementById('selMatA'), mb = document.getElementById('selMatB');
   if (a.options.length) return;
-  keys.forEach(k => {
-    a.add(new Option(k, k));
-    b.add(new Option(k, k));
-  });
-  a.value = keys[0];
-  b.value = keys[1] || keys[0];
-  a.addEventListener('change', renderSim);
-  b.addEventListener('change', renderSim);
-  document.getElementById('selSimMatrix').addEventListener('change', renderSim);
+  [a, b, ma, mb].forEach(sel => keys.forEach(k => sel.add(new Option(k, k))));
+  const orig = simOriginalKey();
+  // Por defecto: la más nueva contra la original
+  a.value = keys[0];   b.value = orig;
+  ma.value = keys[0];  mb.value = orig;
+  [a, b].forEach(sel => sel.addEventListener('change', renderSim));
+  [ma, mb, document.getElementById('selSimMatrix')]
+    .forEach(sel => sel.addEventListener('change', renderSimMatrix));
 }
 
 function simCard(sim, label, accent) {
@@ -1446,68 +1452,49 @@ function simCard(sim, label, accent) {
   </div>`;
 }
 
-// opts.la / opts.lb son los nombres de cada versión, para no dejar el valor de
-// comparación como un "B:" anónimo.
-function simStat(label, va, vb, opts) {
-  opts = opts || {};
-  const f = opts.pct ? (v => v == null ? '—' : v.toFixed(2) + '%') : fmt;
-  const d = (va != null && vb != null) ? va - vb : null;
-  const relPct = (!opts.pct && d != null && vb) ? (100 * d / vb) : null;
-  let col = '#999';
-  if (d != null && Math.abs(d) > 1e-9) col = d > 0 ? 'var(--green)' : 'var(--red)';
-  const dtxt = d == null ? '' :
-    `<div style="font-size:10px;font-weight:700;color:${col};margin-top:6px">${d > 0 ? '+' : ''}${opts.pct ? d.toFixed(2) + 'pp' : fmt(d)}${relPct != null ? ' (' + (relPct > 0 ? '+' : '') + relPct.toFixed(1) + '%)' : ''}</div>`;
-  const sub = opts.sub ? `<div style="font-size:10px;color:#666;margin-top:3px">${opts.sub}</div>` : '';
-  return `<div style="background:#1a1a1a;border-radius:6px;padding:12px 14px">
-    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:8px">${label}</div>
-    <div style="display:flex;gap:18px;align-items:flex-end">
-      <div>
-        <div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:2px">${opts.la || 'A'}</div>
-        <div style="font-size:20px;font-weight:800;color:#fff;line-height:1">${f(va)}</div>
-      </div>
-      <div>
-        <div style="font-size:10px;color:#888;font-weight:700;margin-bottom:2px">${opts.lb || 'B'}</div>
-        <div style="font-size:15px;font-weight:700;color:#999;line-height:1.2">${f(vb)}</div>
-      </div>
-    </div>
-    ${dtxt}${sub}
-  </div>`;
+
+// La original es la línea base del experimento: todas las versiones se miden contra ella.
+// Se marca con es_original en los datos y no por posición, para que reordenar no la cambie.
+function simOriginalKey() {
+  const ks = Object.keys(SIMULACIONES);
+  return ks.find(k => SIMULACIONES[k].es_original) || ks[ks.length - 1];
 }
 
-// Tabla con una fila por versión: métricas + Δ vs la versión de referencia (A)
-function renderSimApertura(ka, kb, A, B) {
-  const dPct = (a, b) => {
-    if (a == null || b == null || !b) return '<td class="delta-cell" style="color:#999">—</td>';
-    const d = (a - b) / b * 100;
-    const col = Math.abs(d) < 0.5 ? '#999' : (d > 0 ? 'var(--green)' : 'var(--red)');
-    return `<td class="delta-cell" style="color:${col}">${d > 0 ? '+' : ''}${d.toFixed(1)}%</td>`;
-  };
+// Δ% con color. dir=-1 invierte el criterio (menos es mejor).
+function simDeltaPct(a, b, dir) {
+  if (a == null || b == null || !b) return '<td class="delta-cell" style="color:#999">—</td>';
+  const d = (a - b) / b * 100;
+  const bueno = (dir === -1 ? -d : d) > 0;
+  const col = Math.abs(d) < 0.5 ? '#999' : (bueno ? 'var(--green)' : 'var(--red)');
+  return `<td class="delta-cell" style="color:${col}">${d > 0 ? '+' : ''}${d.toFixed(1)}%</td>`;
+}
+
+// Tabla con TODAS las versiones, cada una comparada contra la original
+function renderSimApertura() {
+  const orig = simOriginalKey();
+  const brl = v => v == null ? '—' : 'R$' + Number(v).toLocaleString('pt-BR');
+  const none = '<td class="delta-cell" style="color:#999">—</td>';
   const dAbs = (a, b) => {
-    if (a == null || b == null) return '<td class="delta-cell" style="color:#999">—</td>';
+    if (a == null || b == null) return none;
     const d = a - b;
     const col = Math.abs(d) < 0.005 ? '#999' : (d > 0 ? 'var(--green)' : 'var(--red)');
     return `<td class="delta-cell" style="color:${col}">${d > 0 ? '+' : ''}${d.toFixed(2)}x</td>`;
   };
-  const brl = v => v == null ? '—' : 'R$' + Number(v).toLocaleString('pt-BR');
 
-  // A es la versión bajo análisis y muestra Δ contra B, que es la base de comparación.
-  // Misma convención que la hoja Campañas: los Δ son siempre A vs B.
-  const row = (label, s, ref, isRef) => {
-    const m = s.metrics || {};
-    const r = ref ? (ref.metrics || {}) : null;
-    const nm = isRef
-      ? `<b>${label}</b> <span style="font-size:9px;color:var(--text3);font-weight:400">base de comparación</span>`
-      : `<b>${label}</b>`;
-    const none = '<td class="delta-cell" style="color:#999">—</td>';
-    return `<tr${isRef ? ' style="background:var(--bg3)"' : ''}>
-      <td style="text-align:left">${nm}</td>
-      <td class="${isRef ? 'month-b' : 'month-a'}">${fmt(m.usuarios)}</td>${isRef ? none : dPct(m.usuarios, r.usuarios)}
-      <td>${brl(m.lim_actual)}</td>${isRef ? none : dPct(m.lim_actual, r.lim_actual)}
-      <td>${brl(m.lim_final)}</td>${isRef ? none : dPct(m.lim_final, r.lim_final)}
-      <td>${m.mult != null ? m.mult + 'x' : '—'}</td>${isRef ? none : dAbs(m.mult, r.mult)}
-      <td>${fmtBRL(m.exposicion)}</td>${isRef ? none : dPct(m.exposicion, r.exposicion)}
+  const filas = Object.keys(SIMULACIONES).map(k => {
+    const m = SIMULACIONES[k].metrics || {};
+    const r = SIMULACIONES[orig].metrics || {};
+    const esOrig = k === orig;
+    const tag = esOrig ? ' <span style="font-size:9px;color:var(--text3);font-weight:400">original — base</span>' : '';
+    return `<tr${esOrig ? ' style="background:var(--bg3)"' : ''}>
+      <td style="text-align:left"><b>${k}</b>${tag}</td>
+      <td class="${esOrig ? 'month-b' : 'month-a'}">${fmt(m.usuarios)}</td>${esOrig ? none : simDeltaPct(m.usuarios, r.usuarios)}
+      <td>${brl(m.lim_actual)}</td>${esOrig ? none : simDeltaPct(m.lim_actual, r.lim_actual)}
+      <td>${brl(m.lim_final)}</td>${esOrig ? none : simDeltaPct(m.lim_final, r.lim_final)}
+      <td>${m.mult != null ? m.mult + 'x' : '—'}</td>${esOrig ? none : dAbs(m.mult, r.mult)}
+      <td>${fmtBRL(m.exposicion)}</td>${esOrig ? none : simDeltaPct(m.exposicion, r.exposicion)}
     </tr>`;
-  };
+  }).join('');
 
   document.getElementById('simAperturaTable').innerHTML = `
     <thead><tr>
@@ -1518,11 +1505,69 @@ function renderSimApertura(ka, kb, A, B) {
       <th>Mult.</th><th>Δ Mult.</th>
       <th>Exposición</th><th>Δ% Exp.</th>
     </tr></thead>
-    <tbody>${row(ka, A, B, false)}${ka === kb ? '' : row(kb, B, null, true)}</tbody>`;
+    <tbody>${filas}</tbody>`;
 }
 
-// Matriz BHV × Upsell, una por versión, con la métrica elegida en el selector
-function renderSimMatrix(ka, kb, A, B) {
+// Resumen del funnel como tabla, también con todas las versiones contra la original
+function renderSimResumen() {
+  const orig = simOriginalKey();
+  const none = '<td class="delta-cell" style="color:#999">—</td>';
+  const datos = k => {
+    const s = SIMULACIONES[k];
+    const surv = s.killers.length ? s.killers[s.killers.length - 1].accumulated : null;
+    return {
+      univ: s.funnel.total_users,
+      surv,
+      excl: s.funnel.excluded_by_policy,
+      imp: s.funnel.users_to_impact,
+      tasa: surv ? 100 * s.funnel.users_to_impact / surv : null,
+      nk: s.killers.length,
+    };
+  };
+  const r = datos(orig);
+
+  const filas = Object.keys(SIMULACIONES).map(k => {
+    const d = datos(k);
+    const esOrig = k === orig;
+    const tag = esOrig ? ' <span style="font-size:9px;color:var(--text3);font-weight:400">original — base</span>' : '';
+    let dTasa = none;
+    if (!esOrig && d.tasa != null && r.tasa != null) {
+      const dd = d.tasa - r.tasa;
+      const col = Math.abs(dd) < 0.05 ? '#999' : (dd > 0 ? 'var(--green)' : 'var(--red)');
+      dTasa = `<td class="delta-cell" style="color:${col}">${dd > 0 ? '+' : ''}${dd.toFixed(2)}pp</td>`;
+    }
+    return `<tr${esOrig ? ' style="background:var(--bg3)"' : ''}>
+      <td style="text-align:left"><b>${k}</b>${tag}</td>
+      <td style="color:var(--text3)">${d.nk}</td>
+      <td>${fmt(d.univ)}</td>
+      <td class="${esOrig ? 'month-b' : 'month-a'}">${fmt(d.surv)}</td>${esOrig ? none : simDeltaPct(d.surv, r.surv)}
+      <td>${fmt(d.excl)}</td>
+      <td class="${esOrig ? 'month-b' : 'month-a'}">${fmt(d.imp)}</td>${esOrig ? none : simDeltaPct(d.imp, r.imp)}
+      <td>${d.tasa != null ? d.tasa.toFixed(2) + '%' : '—'}</td>${dTasa}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('simResumenTable').innerHTML = `
+    <thead><tr>
+      <th style="text-align:left">Versión</th>
+      <th>Q killers</th>
+      <th>Universo</th>
+      <th>Sobreviven</th><th>Δ% Sobr.</th>
+      <th>Excl. política</th>
+      <th>Impactados</th><th>Δ% Imp.</th>
+      <th>Tasa aprob.</th><th>Δ Tasa</th>
+    </tr></thead>
+    <tbody>${filas}</tbody>`;
+}
+
+
+// Matriz BHV × Upsell. Tiene sus propios selectores de versión, independientes de los
+// de arriba, para poder cruzar cualquier par sin perder el contexto del resto de la hoja.
+function renderSimMatrix() {
+  const ka = document.getElementById('selMatA').value;
+  const kb = document.getElementById('selMatB').value;
+  const A = SIMULACIONES[ka], B = SIMULACIONES[kb];
+  if (!A || !B) return;
   const metric = document.getElementById('selSimMatrix').value;
   const RANK = { A: 1, B: 2, C: 3, D: 4, E: 5, F: 6 };
   const ordena = s => [...s].sort((x, y) => (RANK[x] || 99) - (RANK[y] || 99));
@@ -1598,26 +1643,24 @@ function renderSim() {
 
   const lastA = A.killers.length ? A.killers[A.killers.length - 1].accumulated : null;
   const lastB = B.killers.length ? B.killers[B.killers.length - 1].accumulated : null;
-  const rateA = lastA ? 100 * A.funnel.users_to_impact / lastA : null;
-  const rateB = lastB ? 100 * B.funnel.users_to_impact / lastB : null;
-  const L = { la: ka, lb: kb };
-  document.getElementById('simResumen').innerHTML =
-    simStat('Universo procesado', A.funnel.total_users, B.funnel.total_users, L) +
-    simStat('Sobreviven a killers', lastA, lastB, L) +
-    simStat('Tasa aprobación política', rateA, rateB, {
-      ...L,
-      pct: true,
-      sub: `Excl. por política: ${fmt(A.funnel.excluded_by_policy)} (${ka}) vs ${fmt(B.funnel.excluded_by_policy)} (${kb})`
-    });
+  // Tablas de historial: no dependen de los selectores, muestran todas las versiones
+  renderSimApertura();
+  renderSimResumen();
+  renderSimMatrix();
 
-  renderSimApertura(ka, kb, A, B);
-  renderSimMatrix(ka, kb, A, B);
+  // Métricas generales: la versión elegida en A siempre contra la original, que es la
+  // línea base del experimento. Comparar contra la versión anterior escondería el
+  // efecto acumulado de los cambios.
+  const korig = simOriginalKey();
+  const O = SIMULACIONES[korig];
+  const wrap = s => ({
+    metrics: { SIM: s.metrics },
+    funnels: { SIM: { total: s.funnel.total_users, killers: s.killers.map(k => ({ name: k.name, accumulated: k.accumulated })) } }
+  });
+  renderMetrics('__SIM__', 'SIM', ka, korig, wrap(A), wrap(O), 'simMetricsRow');
 
-  // Métricas generales y funnel — mismos renders que la hoja Campañas
-  const wrapA = { metrics: { SIM: A.metrics }, funnels: { SIM: { total: A.funnel.total_users, killers: A.killers.map(k => ({ name: k.name, accumulated: k.accumulated })) } } };
-  const wrapB = { metrics: { SIM: B.metrics }, funnels: { SIM: { total: B.funnel.total_users, killers: B.killers.map(k => ({ name: k.name, accumulated: k.accumulated })) } } };
-  renderMetrics('__SIM__', 'SIM', ka, kb, wrapA, wrapB, 'simMetricsRow');
-  renderFunnels('__SIM__', 'SIM', ka, kb, wrapA, wrapB, {
+  // Funnel de killers: sí respeta los dos selectores de arriba
+  renderFunnels('__SIM__', 'SIM', ka, kb, wrap(A), wrap(B), {
     labelA: 'simFunnelLabelA', labelB: 'simFunnelLabelB',
     totalA: 'simFunnelTotalA', totalB: 'simFunnelTotalB', body: 'simFunnelBody'
   });
