@@ -730,6 +730,7 @@
   <div class="sub-tabs-inner">
     <button class="sub-tab active" data-sub="campanas" onclick="switchSubTab('campanas')">Campañas</button>
     <button class="sub-tab" data-sub="simulaciones" onclick="switchSubTab('simulaciones')">Simulaciones</button>
+    <button class="sub-tab" data-sub="historial" onclick="switchSubTab('historial')">Historial de cambios</button>
   </div>
 </nav>
 
@@ -866,6 +867,16 @@
   <!-- NISE (hidden, kept for delta comparison in future) -->
   <div id="niseSection" style="display:none">
     <table class="nise-table" id="niseTable"><thead><tr><th id="nHead1"></th><th id="nHead2"></th></tr></thead><tbody id="niseBody"></tbody></table>
+  </div>
+
+  <!-- SUB-HOJA: HISTORIAL DE CAMBIOS -->
+  <div id="historialSection" style="display:none">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
+      <span class="ctrl-label">Política</span>
+      <select id="selHistPol"></select>
+      <span style="font-size:10px;color:var(--text3)">Los cambios se muestran del mes más reciente al más antiguo.</span>
+    </div>
+    <div id="historialBody"></div>
   </div>
 
   <!-- SUB-HOJA: SIMULACIONES -->
@@ -1110,16 +1121,18 @@ function applyView() {
   // Las sub-hojas solo existen dentro de Upsell Individuos
   document.getElementById('subTabs').style.display = isInd ? '' : 'none';
   const onSim = isInd && currentSubTab === 'simulaciones';
+  const onHist = isInd && currentSubTab === 'historial';
   document.getElementById('simulacionesSection').style.display = onSim ? '' : 'none';
+  document.getElementById('historialSection').style.display = onHist ? '' : 'none';
 
-  if (onSim) {
+  if (onSim || onHist) {
     document.getElementById('emptyState').style.display = 'none';
     ALL_SECTION_IDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.style.display = 'none';
     });
-    initSimSelectors();
-    renderSim();
+    if (onSim) { initSimSelectors(); renderSim(); }
+    else       { initHistSelector(); renderHistorial(); }
     return;
   }
 
@@ -1130,6 +1143,147 @@ function applyView() {
     if (el) el.style.display = isEmpty ? 'none' : '';
   });
   if (!isEmpty) { initSelectors(currentProductType); render(); }
+}
+
+// ===== HISTORIAL DE CAMBIOS =====
+// KILLER_NOTES está indexado política → killer → mes → nota. Acá se invierte a
+// mes → tipo de cambio → killer → políticas afectadas, para armar la línea de tiempo.
+//
+// Ojo: el mes de la clave NO siempre es el mes del cambio. Las bajas se anotan en el
+// último mes donde el killer todavía existía ("[Jul-26] ... eliminado en Ago-26"), así
+// que el mes real se lee del texto de la nota y sólo se cae a la clave si no dice nada.
+function buildHistorial() {
+  const MES_RE = /\b([A-Z][a-z]{2}-\d{2})\b/;
+  const tipoDe = nota => {
+    const n = nota.toLowerCase();
+    if (n.includes('eliminado')) return 'eliminado';
+    if (n.includes('modificado')) return 'modificado';
+    if (n.includes('nuevo')) return 'nuevo';
+    return 'otro';
+  };
+
+  const porMes = {};
+  Object.entries(typeof KILLER_NOTES !== 'undefined' ? KILLER_NOTES : {}).forEach(([pol, killers]) => {
+    Object.entries(killers).forEach(([killer, meses]) => {
+      Object.entries(meses).forEach(([mesClave, nota]) => {
+        const tipo = tipoDe(nota);
+        // El mes que menciona el texto manda sobre la clave (importa para las bajas)
+        const m = nota.match(MES_RE);
+        const mes = m ? m[1] : mesClave;
+        porMes[mes] = porMes[mes] || { nuevo: {}, modificado: {}, eliminado: {}, otro: {} };
+        const slot = porMes[mes][tipo];
+        slot[killer] = slot[killer] || { nota, pols: [] };
+        if (!slot[killer].pols.includes(pol)) slot[killer].pols.push(pol);
+      });
+    });
+  });
+  return porMes;
+}
+
+function initHistSelector() {
+  const sel = document.getElementById('selHistPol');
+  if (sel.options.length) return;
+  sel.add(new Option('— Todas las políticas —', 'TODAS'));
+  Object.keys(POLICY_MAP || {}).forEach(p => { if (p !== 'CONSOLIDADO') sel.add(new Option(p, p)); });
+  sel.value = 'TODAS';
+  sel.addEventListener('change', renderHistorial);
+}
+
+function renderHistorial() {
+  const filtro = document.getElementById('selHistPol').value;
+  const hist = buildHistorial();
+  const comments = typeof MONTH_COMMENTS !== 'undefined' ? MONTH_COMMENTS : {};
+
+  // Orden cronológico: primero los meses de MONTHS (newest-first), después los que
+  // sólo aparecen en las notas o en los comentarios.
+  const deMonths = Object.keys(MONTHS || {});
+  const resto = [...new Set([...Object.keys(hist), ...Object.keys(comments)])]
+    .filter(m => !deMonths.includes(m));
+  const meses = [...deMonths, ...resto].filter(m => hist[m] || comments[m]);
+
+  if (!meses.length) {
+    document.getElementById('historialBody').innerHTML =
+      '<div style="color:var(--text3);padding:16px">Sin cambios registrados.</div>';
+    return;
+  }
+
+  const totalPols = Object.keys(POLICY_MAP || {}).filter(p => p !== 'CONSOLIDADO').length;
+
+  const TIPOS = [
+    { key: 'nuevo',      label: 'Agregados',   icon: '🟢', col: '#27ae60' },
+    { key: 'eliminado',  label: 'Eliminados',  icon: '🔴', col: '#e53935' },
+    { key: 'modificado', label: 'Modificados', icon: '🟡', col: '#fb8c00' },
+    { key: 'otro',       label: 'Otros',       icon: '⚪', col: '#888' },
+  ];
+
+  const html = meses.map(mes => {
+    const grupos = hist[mes] || {};
+    const notas = comments[mes] || [];
+
+    // Bloque de novedades de política
+    const novedades = notas.length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:6px">Novedades de política</div>
+        <ul style="margin:0;padding-left:18px;color:#ccc;font-size:12px;line-height:1.7">
+          ${notas.map(n => `<li>${n}</li>`).join('')}
+        </ul>
+      </div>` : '';
+
+    // Bloques de killers por tipo de cambio
+    let bloques = '';
+    let totalCambios = 0;
+    TIPOS.forEach(t => {
+      let items = Object.entries(grupos[t.key] || {});
+      if (filtro !== 'TODAS') items = items.filter(([, v]) => v.pols.includes(filtro));
+      if (!items.length) return;
+      totalCambios += items.length;
+      const filas = items.map(([killer, v]) => {
+        const alcance = v.pols.length >= totalPols
+          ? 'todas las políticas'
+          : `${v.pols.length} política${v.pols.length > 1 ? 's' : ''}: ${v.pols.join(', ')}`;
+        // Se saca sólo el "Killer nuevo en <Mes>", que ya está implícito en el bloque y en
+        // el título del mes. Lo que sigue se preserva tal cual — incluye los "(reemplaza X)".
+        const desc = v.nota
+          .replace(/^(Killer\s+)?(nuevo|eliminado|modificado)\s+en\s+[A-Z][a-z]{2}-\d{2}\s*/i, '')
+          .replace(/^[:—-]\s*/, '')
+          .replace(/^\.$/, '')
+          .trim();
+        return `<div style="padding:7px 0;border-bottom:1px solid var(--border)">
+          <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
+            <span style="font-size:11px;font-weight:700;color:${t.col}">${killer}</span>
+            <span style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em">${alcance}</span>
+          </div>
+          ${desc ? `<div style="font-size:11px;color:#aaa;line-height:1.6;margin-top:3px">${desc}</div>` : ''}
+        </div>`;
+      }).join('');
+      bloques += `<div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:4px">${t.icon} ${t.label} (${items.length})</div>
+        ${filas}
+      </div>`;
+    });
+
+    const killersBlock = bloques
+      ? `<div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:8px">Cambios de killers</div>${bloques}</div>`
+      : (filtro !== 'TODAS'
+          ? '<div style="font-size:11px;color:var(--text3)">Sin cambios de killers para esta política en el período.</div>'
+          : '');
+
+    const meta = MONTHS[mes] && MONTHS[mes].meta ? MONTHS[mes].meta : null;
+    const sub = meta
+      ? `<a href="${meta.eoc_url}" target="_blank" style="font-size:10px;color:#888;text-decoration:underline">${meta.campaign}</a>`
+      : '';
+
+    return `<div style="background:#1a1a1a;border-radius:6px;padding:14px 16px;margin-bottom:12px;border-left:3px solid var(--accent-yellow)">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:15px;font-weight:800;color:var(--accent-yellow)">${mes}</span>
+        <span style="font-size:10px;color:var(--text3)">${totalCambios} cambio${totalCambios === 1 ? '' : 's'} de killers${notas.length ? ` · ${notas.length} novedad${notas.length === 1 ? '' : 'es'} de política` : ''}</span>
+        ${sub}
+      </div>
+      ${novedades}${killersBlock}
+    </div>`;
+  }).join('');
+
+  document.getElementById('historialBody').innerHTML = html;
 }
 
 // ===== SIMULACIONES =====
