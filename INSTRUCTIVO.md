@@ -132,8 +132,9 @@ Repo local con el HTML, las queries y los datos: `/Users/nbattaglia/Documents/ta
 
 ```
 UPSELL INDIVIDUOS  |  UPSELL SELLERS      ← nav de producto
-  ├─ Campañas          ← comparación mes a mes (todo este instructivo)
-  └─ Simulaciones      ← comparación entre dos corridas SIMULATION (ver flujo al final)
+  ├─ Campañas               ← comparación mes a mes (todo este instructivo)
+  ├─ Simulaciones           ← versiones de un experimento (ver flujo al final)
+  └─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
 ```
 
 Las sub-hojas **existen sólo dentro de Upsell Individuos**. Al pasar a Sellers la barra desaparece.
@@ -1290,22 +1291,28 @@ Los ratings salen de `ACTIONABLE_COLUMNS` (`INTERNAL_RATING_BEHAVIOR_TC` e
 
 ### Paso SIM-4: Inyectar en el HTML
 
-Agregar la entrada a la constante `SIMULACIONES`. El label es lo que se ve en los selectores:
+Las simulaciones se agrupan por **campaña** en `SIM_GRUPOS`. Cada grupo es un experimento
+independiente con su propia versión original; para arrancar un experimento nuevo se agrega una
+clave de grupo y no se toca nada del render.
 
-> **⚠ Orden: newest-first.** `SIMULACIONES` va ordenado de la versión **más nueva a la más vieja**,
-> igual que `MONTHS`. La simulación nueva se inserta **primero**.
+> **⚠ Orden: newest-first.** Dentro de cada grupo, la versión **más nueva va primera**.
 >
-> El motivo: los selectores toman `Object.keys()[0]` como **A** y `[1]` como **B**, y todo el
-> dashboard interpreta **A = versión bajo análisis, B = base de comparación**. Con ese orden los Δ
-> se leen "nuevo vs base" y dan **positivos** cuando la versión nueva crece.
+> El motivo: los selectores toman `Object.keys()[0]` como **A**, y todo el dashboard interpreta
+> **A = versión bajo análisis**. Con ese orden los Δ se leen "nuevo vs base" y dan **positivos**
+> cuando la versión nueva crece.
 >
-> Si se invierte el orden no se rompe nada — las etiquetas del panel de diferencias y de las cards
-> se recalculan solas a partir de los selectores — pero todos los Δ aparecen con el signo cambiado
-> y el killer eliminado se muestra como agregado. **Siempre la nueva primero.**
+> Si se invierte el orden no se rompe nada — las etiquetas se recalculan solas a partir de los
+> selectores — pero todos los Δ aparecen con el signo cambiado y el killer eliminado se muestra
+> como agregado. **Siempre la nueva primero.**
+
+> **⚠ La original se marca con `es_original: true`**, no por posición. Es la línea base contra la
+> que se miden todas las versiones del grupo en métricas, apertura y resumen del funnel. Si falta
+> el flag, el dashboard cae a la última del objeto — que suele ser la correcta, pero no siempre.
 
 ```js
-const SIMULACIONES = {
-  "[ID] — [etiqueta]": {          // NUEVA primero. Ej: "6964 — v2"
+const SIM_GRUPOS = {
+  "[NOMBRE DE LA CAMPAÑA DE SIMULACIÓN]": {   // ej: "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC"
+  "[ID] — [etiqueta]": {          // NUEVA primero. Ej: "6969 — v4"
     campaign_id: [ID],
     name: "[NOMBRE_EN_EOC]",
     exec_id: "[EXEC_ID]",
@@ -1314,20 +1321,33 @@ const SIMULACIONES = {
     funnel:  { total_users: N, excluded_by_rules: N, excluded_by_policy: N, users_to_impact: N },
     killers: [{ name: "K-...", excluded: N, accumulated: N }, ...],
     metrics: { usuarios: N, lim_actual: N, lim_final: N, mult: N, exposicion: N },
-    rating_matrix: { "A": { "B": { usuarios: N, lim_actual: N, lim_final: N, mult: N }, ... }, ... }
+    rating_matrix: { "A": { "B": { usuarios: N, lim_actual: N, lim_final: N, mult: N }, ... }, ... },
+    es_original: true             // SÓLO en la versión base del experimento
   },
-  // ... simulaciones anteriores, de más nueva a más vieja
+  // ... versiones anteriores del mismo experimento, de más nueva a más vieja
+  },
+  // ... otros experimentos, cada uno con su propio grupo
 } ;
 ```
 
-Los selectores A/B se pueblan solos con `Object.keys(SIMULACIONES)` — no hay que tocar el HTML.
+Los selectores se pueblan solos con `Object.keys()` del grupo activo — no hay que tocar el HTML.
 
-**Cómo leer los resultados con esta convención:**
+**Qué filtra cada sección:**
 
-| Sección | A (primera del objeto) | B (segunda) |
+| Sección | Compara |
+|---|---|
+| Métricas generales | la versión de A **siempre contra la original** |
+| Apertura por versión | todas las versiones del grupo, cada una contra la original |
+| Resumen del funnel | todas las versiones del grupo, cada una contra la original |
+| Diferencias + Funnel de killers | par propio de selectores |
+| Matriz de ratings | par propio de selectores |
+
+**Cómo leer A vs B:**
+
+| | A | B |
 |---|---|---|
 | Cards de métricas | valor destacado en azul | valor gris de referencia |
-| Apertura por versión | fila con los Δ | fila marcada "base de comparación" |
+| Apertura por versión | fila con los Δ | fila marcada "original — base" |
 | Diferencias | sólo en A → 🟢 killer **agregado** | sólo en B → 🔴 killer **eliminado** |
 | Funnel | barra azul | barra gris |
 
@@ -1379,6 +1399,63 @@ Después subir con `file_new_version: true` sobre el `doc_id` del dashboard.
 - [ ] Validación jsdom OK — ambas sub-hojas renderizan, 0 errores de JS
 - [ ] Hoja Campañas verificada sin regresiones
 - [ ] Subido al Grid con `file_new_version: true`
+
+---
+
+## ──────────────────────────────────────────
+## HOJA HISTORIAL DE CAMBIOS
+## ──────────────────────────────────────────
+
+Responde "qué cambió de un mes al otro" con tres bloques, filtrables por política:
+
+1. **Línea de tiempo** — las novedades **declaradas** a mano. Sale de `MONTH_COMMENTS` y
+   `KILLER_NOTES`, que ya se cargan en el flujo mensual (Partes 1 y 7-8). La hoja sólo las
+   consolida: en Campañas se ven filtradas por la política seleccionada, acá se ven todas juntas.
+2. **Diff de campañas** — killers, **automático** contra EOC.
+3. **Cambios de política** — parámetros por segmento, **automático** contra EOC.
+
+Los bloques 2 y 3 existen para **auditar** el bloque 1. En la primera corrida encontraron tres
+notas incorrectas de Ago-26 (un killer nuevo sin declarar, uno declarado como eliminado que seguía
+activo en 5 de 9 políticas, y un reemplazo declarado para todas que sólo ocurrió en BAU).
+
+### Diff de campañas (killers)
+
+Datos: `get_campaign_execution_dashboard(campaign_id, include="killer_rules")` para las dos
+campañas. Se excluyen los grupos de sellers de la campaña más nueva si la otra no los tiene —
+no son políticas nuevas, son otro producto con su propia hoja.
+
+> **⚠ Comparar tasa de corte, no volumen absoluto.** El universo de entrada cambia mes a mes, así
+> que en absoluto casi todos los killers "cambian" y el diff se vuelve ruido (330 falsos positivos
+> en Ago vs Jul). La tasa de corte de cada killer — excluidos sobre los que le entran — sí es
+> comparable; con umbral de 2pp quedan 17 movimientos reales.
+
+### Cambios de política
+
+Los scripts están en el repo: `queries/fetch_policies.py` baja las políticas crudas y
+`queries/diff_policies.py` genera el diff.
+
+> **⚠ Bajar las políticas a disco, no por contexto.** `fetch_policies.py` usa el fallback HTTP del
+> MCP (documentado al final de este instructivo) y persiste el JSON tal cual lo devuelve EOC. Pedir
+> 18 políticas por las tools y transcribirlas es un vector de error grande.
+
+Reglas de matcheo, todas necesarias para que el diff no engañe:
+
+- Los segmentos se matchean por su **tupla de condiciones normalizada** (rating upsell, rating BHV,
+  rango de antigüedad), **nunca por `attribute_index` ni por ids**: el índice es sólo orden de carga
+  en la UI y los `parameter_id` / `attribute_definition_id` son distintos en cada política.
+- **Normalizar el case** de los nombres de columna: la misma columna aparece como `withdraw_limit`
+  en una política y `WITHDRAW_LIMIT` en otra.
+- Los valores de condición son **string literal** — pueden ser expresiones tipo `=in(A,B)`.
+- Lo que no matchea **no se fuerza**: va a un balde aparte y la UI lo marca.
+- **Los valores viven en `parameter_values` para los settings y en `parameter_modify` para las
+  exceptions.** Leer sólo uno devuelve "sin cambios" en silencio — el peor modo de fallar, porque
+  parece que no pasó nada.
+- En exceptions comparar nombre, contenido **y orden**: la pipeline es secuencial, cada excepción
+  lee el resultado de la anterior, así que insertar una en el medio cambia el cálculo.
+
+Para actualizarlo: cambiar el dict `POLICIES` de los dos scripts con los `policy_id` de cada
+campaña (salen de `MONTHS[mes].meta.policies`), correr `fetch_policies.py`, después
+`diff_policies.py`, y regenerar el `POL_DIFF` del HTML.
 
 ---
 

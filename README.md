@@ -12,8 +12,9 @@ mes a mes con los resultados de cada campaña.
 
 ```
 UPSELL INDIVIDUOS  |  UPSELL SELLERS      ← nav de producto
-  ├─ Campañas          ← sub-hoja: comparación mes a mes (flujo mensual del instructivo)
-  └─ Simulaciones      ← sub-hoja: comparación entre dos corridas de simulación
+  ├─ Campañas               ← comparación mes a mes (flujo mensual del instructivo)
+  ├─ Simulaciones           ← comparación entre versiones de un experimento
+  └─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
 ```
 
 Las sub-hojas existen sólo dentro de **Upsell Individuos**. Al pasar a Sellers la barra desaparece.
@@ -24,15 +25,34 @@ dinámica (NISE / antigüedad / ratings), distribución, matriz de ratings, busc
 vista Consolidado con competencia de políticas. El flujo completo de carga está en el instructivo.
 
 ### Simulaciones
-Comparación entre dos simulaciones EOC, con el mismo formato visual que Campañas:
+Las simulaciones se agrupan por **campaña** (`SIM_GRUPOS`): cada grupo es un experimento
+independiente, con su propia versión original como base. La barra de arriba cambia de grupo y
+todo el resto de la hoja se recalcula.
 
-- **Métricas generales** — 5 cards (usuarios, límite actual, límite final, multiplicador, exposición)
-- **Apertura por versión** — una fila por simulación con Δ contra la versión de referencia (A)
-- **Resumen del funnel** — universo, sobrevivientes a killers, tasa de aprobación de política
-- **Diferencias detectadas** — killers sólo en A 🔴, sólo en B 🟢, y con distinto volumen 🟡
-- **Matriz de ratings BHV × Upsell** — selector con 4 vistas: % de clientes, límite final avg,
-  límite actual avg y multiplicador avg. Ejes comunes a las dos versiones para comparar celda a celda.
-- **Funnel de killers** — barras comparativas, mismo render que Campañas
+Dentro de un grupo, cada sección tiene su propio filtro:
+
+| Sección | Qué compara |
+|---|---|
+| Métricas generales | la versión elegida en A **siempre contra la original** |
+| Apertura por versión | todas las versiones, cada una contra la original |
+| Resumen del funnel | todas las versiones, cada una contra la original |
+| Diferencias + Funnel de killers | par propio de selectores |
+| Matriz de ratings BHV × Upsell | par propio + 4 vistas (% clientes, límite final/actual avg, multiplicador) |
+
+La **original se marca con el flag `es_original`**, no por posición: reordenar el objeto no
+cambia la base de comparación.
+
+### Historial de cambios
+Tres bloques, con un filtro de política común:
+
+1. **Línea de tiempo** — novedades declaradas a mano (`MONTH_COMMENTS` + `KILLER_NOTES`),
+   consolidadas mes a mes en lugar de filtradas por política como en Campañas.
+2. **Diff de campañas** — killers, automático contra EOC. Usa **tasa de corte**, no volumen
+   absoluto: el universo de entrada cambia mes a mes y comparar absolutos marca como "cambio"
+   casi todos los killers.
+3. **Cambios de política** — parámetros por segmento, automático. Ver sección más abajo.
+
+Los bloques 2 y 3 sirven para **auditar** el bloque 1: ya detectaron notas incorrectas.
 
 ## Contenido del repo
 
@@ -56,17 +76,23 @@ queries/simulaciones_matriz_ratings.sql matriz BHV × Upsell por simulación
 
 2. **Métricas y matriz** — correr las dos queries de `queries/` reemplazando los `[EXEC_ID_*]`.
 
-3. **Inyectar** en la constante `SIMULACIONES` del HTML:
+3. **Inyectar** en `SIM_GRUPOS`, dentro del grupo que corresponda:
    ```js
-   "<label>": {
-     campaign_id, name, exec_id, group_name, eoc_url,
-     funnel:  { total_users, excluded_by_rules, excluded_by_policy, users_to_impact },
-     killers: [{ name, excluded, accumulated }, ...],
-     metrics: { usuarios, lim_actual, lim_final, mult, exposicion },
-     rating_matrix: { "<BHV>": { "<UPS>": { usuarios, lim_actual, lim_final, mult } } }
-   }
+   const SIM_GRUPOS = {
+     "<NOMBRE DE LA CAMPAÑA DE SIMULACIÓN>": {
+       "<label>": {                       // ej: "6969 — v4". La más nueva va primera.
+         campaign_id, name, exec_id, group_name, eoc_url,
+         funnel:  { total_users, excluded_by_rules, excluded_by_policy, users_to_impact },
+         killers: [{ name, excluded, accumulated }, ...],
+         metrics: { usuarios, lim_actual, lim_final, mult, exposicion },
+         rating_matrix: { "<BHV>": { "<UPS>": { usuarios, lim_actual, lim_final, mult } } },
+         es_original: true                // sólo en la versión base del experimento
+       }
+     }
+   };
    ```
-   Los selectores A/B se pueblan solos con `Object.keys(SIMULACIONES)`.
+   Para un experimento nuevo, agregar una clave de grupo — el resto del render no se toca.
+   Los selectores se pueblan solos con `Object.keys()` del grupo activo.
 
 4. **Subir** a Grid con `file_new_version: true` sobre el `doc_id` del dashboard.
 
@@ -82,6 +108,12 @@ queries/simulaciones_matriz_ratings.sql matriz BHV × Upsell por simulación
   avisa de esto explícitamente — no confundir efecto cascada con cambio de lógica.
 - **Validar siempre contra EOC**: la cantidad de usuarios que devuelve la query de métricas tiene
   que coincidir exacto con `users_to_impact` del dashboard de EOC.
+- **Si los killers vienen transcriptos y no extraídos programáticamente**, verificar la cadena
+  `acumulado[i] = acumulado[i-1] − excluidos[i]` en toda la secuencia. Un error de tipeo la rompe.
+  Tiene que cerrar además contra `total − excluded_by_rules` y contra
+  `impactados + excluded_by_policy`.
+- **`SIMULACIONES` es `let`, no `const`** — apunta al grupo activo de `SIM_GRUPOS` y
+  `switchSimGrupo` la reasigna. El resto del render la consume sin saber que hay grupos.
 
 ## Testing
 
