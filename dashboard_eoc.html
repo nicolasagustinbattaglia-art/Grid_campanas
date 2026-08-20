@@ -164,6 +164,25 @@
   }
   .sub-tab:hover { color: #ccc; border-color: #444; }
   .sub-tab.active { color: var(--accent-yellow); border-color: var(--accent-yellow); background: rgba(255,229,0,0.06); }
+
+  /* Chips de campaña de la hoja Simulaciones: van sobre fondo claro, así que
+     usan el bloque negro del dashboard en lugar del amarillo de los tabs. */
+  .grupo-tab {
+    background: none;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    color: var(--text2);
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    white-space: nowrap;
+  }
+  .grupo-tab:hover { color: var(--text); border-color: #999; }
+  .grupo-tab.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
   /* EMPTY STATE */
   #emptyState {
     display: none;
@@ -1544,9 +1563,8 @@ function renderSimGrupos() {
     grupos.map(g => {
       const act = g === simGrupoActivo;
       const n = Object.keys(SIM_GRUPOS[g]).length;
-      return `<button class="sub-tab${act ? ' active' : ''}" onclick="switchSimGrupo('${g.replace(/'/g, "\\'")}')"
-        style="text-transform:none;letter-spacing:0.02em;font-size:11px">${g}
-        <span style="opacity:0.6;font-weight:400"> · ${n}</span></button>`;
+      return `<button class="grupo-tab${act ? ' active' : ''}" onclick="switchSimGrupo('${g.replace(/'/g, "\\'")}')">${g}
+        <span style="opacity:0.55;font-weight:400"> · ${n}</span></button>`;
     }).join('');
 }
 
