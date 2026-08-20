@@ -1,0 +1,245 @@
+{
+ "campaign_id": 6970,
+ "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC v4",
+ "type": "CAMPAIGN",
+ "exec_id": "b02026d3-7207-43f8-aa04-ea2d02b6e8bf",
+ "groups": [
+  {
+   "group_name": "RIESGO MED. SOW",
+   "execution_group_id": "b02026d3-7207-43f8-aa04-ea2d02b6e8bf-1",
+   "funnel": {
+    "total_users": 21237383,
+    "excluded_by_rules": 20444936,
+    "excluded_by_policy": 729788,
+    "users_to_impact": 62659
+   },
+   "killers": [
+    {
+     "name": "K-TC-STATUS_DIF_ACCEPTED",
+     "excluded": 180804,
+     "accumulated": 21056579
+    },
+    {
+     "name": "K-TC-LIMIT_ACTUAL_MENOR_500",
+     "excluded": 4112214,
+     "accumulated": 16944365
+    },
+    {
+     "name": "K-TC-CUENTA_NO_ACTIVA",
+     "excluded": 4900886,
+     "accumulated": 12043479
+    },
+    {
+     "name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D",
+     "excluded": 1868856,
+     "accumulated": 10174623
+    },
+    {
+     "name": "K-SIN-INGRESOS",
+     "excluded": 3053,
+     "accumulated": 10171570
+    },
+    {
+     "name": "K-BLACKLIST",
+     "excluded": 15164,
+     "accumulated": 10156406
+    },
+    {
+     "name": "K-RESTRICCIONES_MELI",
+     "excluded": 41520,
+     "accumulated": 10114886
+    },
+    {
+     "name": "K-CC_PROPOSAL_MISTAKE",
+     "excluded": 143718,
+     "accumulated": 9971168
+    },
+    {
+     "name": "K-TC-PERMANENTEMENTE_BLOQUEADO",
+     "excluded": 40793,
+     "accumulated": 9930375
+    },
+    {
+     "name": "K-TC-TRANSICIONAL_BLOQUEADO",
+     "excluded": 32,
+     "accumulated": 9930343
+    },
+    {
+     "name": "K-RESTRUCTURACION_DEUDA",
+     "excluded": 10296,
+     "accumulated": 9920047
+    },
+    {
+     "name": "K-SIN_CPF",
+     "excluded": 147356,
+     "accumulated": 9772691
+    },
+    {
+     "name": "K-MENOR_EDAD",
+     "excluded": 206,
+     "accumulated": 9772485
+    },
+    {
+     "name": "K-FLAG_OVERDUE",
+     "excluded": 463428,
+     "accumulated": 9309057
+    },
+    {
+     "name": "K-ATRASO_OPF",
+     "excluded": 329423,
+     "accumulated": 8979634
+    },
+    {
+     "name": "K-TC-STATUS_CANCELADA",
+     "excluded": 174393,
+     "accumulated": 8805241
+    },
+    {
+     "name": "K-TC-DESACTIVADA_OFERTAS_UPSELL",
+     "excluded": 39448,
+     "accumulated": 8765793
+    },
+    {
+     "name": "K-ATRASO-SCR",
+     "excluded": 176406,
+     "accumulated": 8589387
+    },
+    {
+     "name": "K-MLB-RENTA-NEGATIVIZADA-MAYOR-10",
+     "excluded": 105891,
+     "accumulated": 8483496
+    },
+    {
+     "name": "K-MLB-DEUDA-MAYOR-LIMIT-SIN-OVERLIMIT",
+     "excluded": 252506,
+     "accumulated": 8230990
+    },
+    {
+     "name": "K-RATING_EXTERNO_G_NULL",
+     "excluded": 82294,
+     "accumulated": 8148696
+    },
+    {
+     "name": "K-TC-S-ULTIMO_SCORE_BHV",
+     "excluded": 824953,
+     "accumulated": 7323743
+    },
+    {
+     "name": "K-NO-PAGO-TOTAL-ADELANTADO-TC",
+     "excluded": 221680,
+     "accumulated": 7102063
+    },
+    {
+     "name": "K-90D_ULT_DOWNSELL_LC",
+     "excluded": 0,
+     "accumulated": 7102063
+    },
+    {
+     "name": "K-LC-60D_RECENTLY_CREATED",
+     "excluded": 225288,
+     "accumulated": 6876775
+    },
+    {
+     "name": "K-SEL-ESTADO-1ER-CUOTA-CF",
+     "excluded": 55015,
+     "accumulated": 6821760
+    },
+    {
+     "name": "K-SEL-ATRASO-CF-90D-EVER",
+     "excluded": 2469,
+     "accumulated": 6819291
+    },
+    {
+     "name": "K-90D_ULT_DOWNSELL_TC",
+     "excluded": 193426,
+     "accumulated": 6625865
+    },
+    {
+     "name": "K-MLB-360D-ULT-PIX-APUESTAS",
+     "excluded": 663209,
+     "accumulated": 5962656
+    },
+    {
+     "name": "K-MLB-USE-PIX-SALDO-PCT",
+     "excluded": 91975,
+     "accumulated": 5870681
+    },
+    {
+     "name": "K-USO-SEGURO-PARA-PAGO-TC",
+     "excluded": 1775,
+     "accumulated": 5868906
+    },
+    {
+     "name": "K-60D_ULT_UPSELL_TC_ANTIG_4-12M",
+     "excluded": 558941,
+     "accumulated": 5309965
+    },
+    {
+     "name": "K-90D_ULT_UPSELL_TC_ANTIG_12-24M",
+     "excluded": 749522,
+     "accumulated": 4560443
+    },
+    {
+     "name": "K-120D_ULT_UPSELL_TC_ANTIG_24M",
+     "excluded": 718865,
+     "accumulated": 3841578
+    },
+    {
+     "name": "K-MLB-BRONZE-LIM1400-SILVER-LIM2200",
+     "excluded": 699104,
+     "accumulated": 3142474
+    },
+    {
+     "name": "K-PORC-USO-TC-MIM-POR-ANTIG-ATEN-4M-18M",
+     "excluded": 1648916,
+     "accumulated": 1493558
+    },
+    {
+     "name": "K-SELLERS-2",
+     "excluded": 213550,
+     "accumulated": 1280008
+    },
+    {
+     "name": "K-365D-ULT-REJECTED_AUTOFUND",
+     "excluded": 15581,
+     "accumulated": 1264427
+    },
+    {
+     "name": "K-ULT-TRAMITE-COBRO-SEGURO-INICIADO",
+     "excluded": 2958,
+     "accumulated": 1261469
+    },
+    {
+     "name": "K-MLB-CLUSTER-VOLATIL-F-G",
+     "excluded": 83001,
+     "accumulated": 1178468
+    },
+    {
+     "name": "K-USER_DOWNSELL_MXP_FLAG_TC",
+     "excluded": 0,
+     "accumulated": 1178468
+    },
+    {
+     "name": "K-DETERIORO_CARTERA_GRUPO",
+     "excluded": 4311,
+     "accumulated": 1174157
+    },
+    {
+     "name": "K-MLB_CC_ULT_ORIGINACION_120D",
+     "excluded": 342942,
+     "accumulated": 831215
+    },
+    {
+     "name": "K-CREDITO-DE-ACTIVO",
+     "excluded": 134,
+     "accumulated": 831081
+    },
+    {
+     "name": "K-MLB-ULT-30D-PIX-TC-OTR-BANCO-EVER-TC-MELI",
+     "excluded": 38634,
+     "accumulated": 792447
+    }
+   ]
+  }
+ ]
+}

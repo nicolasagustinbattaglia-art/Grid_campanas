@@ -1327,6 +1327,10 @@ function renderCampDiff(filtro) {
     '<div style="color:var(--text3);padding:16px">Sin datos para esta política.</div>';
 }
 
+// Campañas adicionales a la principal del mes: se ejecutan aparte, con su propia
+// variante de política, y se muestran dentro del bloque del mes en la línea de tiempo.
+const CAMPANAS_EXTRA = {"Ago-26": [{"campaign_id": 6970, "name": "202608-MLB-CROSS-TC FULL-UPSELL-BAU-ADHOC v4", "exec_id": "b02026d3-7207-43f8-aa04-ea2d02b6e8bf", "estado": "PENDING", "politica": "RIESGO MED. SOW", "eoc_url": "https://credits-admin.adminml.com/eoc/campaigns/audience/6970?executionId=b02026d3-7207-43f8-aa04-ea2d02b6e8bf&tab=campaign", "motivo": "Extra de clientes para cerrar el gap de volumen del upsell de agosto. Se tomó la política de Riesgo Medio y se relajaron los killers de uso y rating.", "quitados": [{"n": "K-MLB-RATING_CAPTURA_SALDO", "d": ""}, {"n": "K-PORC-USO-TC-MIM-POR-ANTIG-4M-18M", "d": "reemplazado por la variante ATEN"}], "agregados": [{"n": "K-PORC-USO-TC-MIM-POR-ANTIG-ATEN-4M-18M", "d": "exige un porcentaje de uso mayor y suma criterio de atendimento"}], "base": {"campaign_id": 6816, "grupo": "RIESGO MED. SOW", "impactados": 27333, "sobreviven": 349861, "n_killers": 46}, "funnel": {"total_users": 21237383, "excluded_by_rules": 20444936, "excluded_by_policy": 729788, "users_to_impact": 62659}, "n_killers": 45, "sobreviven": 792447, "gc_pct": 10, "gc_users": 6265, "gi_users": 56394}]} ;
+
 // ===== DIFF DE POLITICAS (Historial) =====
 const POL_DIFF = {"a":{"mes":"Ago-26","campaign_id":6816},"b":{"mes":"Jul-26","campaign_id":6126},"policies":{"BAU":{"pa":{"id":2721,"name":"202608-MLB-IND-TC-FULL-UPSELL-BAU-BAU-PS-v4"},"pb":{"id":2159,"name":"202606-MLB-IND-TC-FULL-UPSELL-BAU-BAU-PS-3 "},"n_seg":24,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":24,"n_seg":24,"delta":-0.1,"items":[{"seg":"A|A|120-359","de":"1.4","a":"1.3"},{"seg":"A|A|360-719","de":"1.5","a":"1.4"},{"seg":"A|A|720-36000","de":"1.5","a":"1.4"},{"seg":"A|C|120-359","de":"1.2","a":"1.1"},{"seg":"A|C|360-719","de":"1.4","a":"1.3"},{"seg":"A|C|720-36000","de":"1.3","a":"1.2"},{"seg":"=in(A,B)|B|120-359","de":"1.3","a":"1.2"},{"seg":"=in(A,B)|B|360-719","de":"1.5","a":"1.4"},{"seg":"=in(A,B)|B|720-36000","de":"1.4","a":"1.3"},{"seg":"B|A|120-359","de":"1.3","a":"1.2"},{"seg":"B|A|360-719","de":"1.5","a":"1.4"},{"seg":"B|A|720-36000","de":"1.4","a":"1.3"},{"seg":"B|C|120-359","de":"1.2","a":"1.1"},{"seg":"B|C|360-719","de":"1.4","a":"1.3"},{"seg":"B|C|720-36000","de":"1.2","a":"1.1"},{"seg":"C|A|120-359","de":"1.2","a":"1.1"},{"seg":"C|A|360-719","de":"1.4","a":"1.3"},{"seg":"C|A|720-36000","de":"1.3","a":"1.2"},{"seg":"C|B|120-359","de":"1.2","a":"1.1"},{"seg":"C|B|360-719","de":"1.4","a":"1.3"},{"seg":"C|B|720-36000","de":"1.3","a":"1.2"},{"seg":"C|C|120-359","de":"1.2","a":"1.1"},{"seg":"C|C|360-719","de":"1.4","a":"1.3"},{"seg":"C|C|720-36000","de":"1.2","a":"1.1"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"JOURNEY 1A":{"pa":{"id":2678,"name":"202608-MLB-IND-TC-JOURNEY-UPSELL-BAU-FLEXIBILIZACIONREGLAS-1ERAÑO-1"},"pb":{"id":2168,"name":"202606-MLB-IND-TC-JOURNEY-UPSELL-BAU-FLEXIBILIZACIONREGLAS-1ERAÑO-1"},"n_seg":40,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{},"fijos_new":[],"fijos_del":[],"exc_add":[],"exc_del":[],"exc_mod":["Redondeo_limite_final","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL","EXCLUSION Upsell Insuficiente"],"exc_reord":false,"n_exc_a":19,"n_exc_b":19},"VIP MP":{"pa":{"id":2722,"name":"202608-MLB-IND-TC FULL-UPSELL-BAU-VIP-MP-BAU-4-v4"},"pb":{"id":2161,"name":"202606-MLB-IND-TC FULL-UPSELL-BAU-VIP-MP-BAU-4"},"n_seg":18,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":18,"n_seg":18,"delta":-0.1,"items":[{"seg":"A|A|120-359","de":"1.6","a":"1.5"},{"seg":"A|A|360-36000","de":"1.7","a":"1.6"},{"seg":"A|B|120-359","de":"1.4","a":"1.3"},{"seg":"A|B|360-36000","de":"1.7","a":"1.6"},{"seg":"A|C|120-359","de":"1.4","a":"1.3"},{"seg":"A|C|360-36000","de":"1.5","a":"1.4"},{"seg":"B|A|120-359","de":"1.4","a":"1.3"},{"seg":"B|A|360-36000","de":"1.7","a":"1.6"},{"seg":"B|B|120-359","de":"1.4","a":"1.3"},{"seg":"B|B|360-36000","de":"1.5","a":"1.4"},{"seg":"B|C|120-359","de":"1.3","a":"1.2"},{"seg":"B|C|360-36000","de":"1.5","a":"1.4"},{"seg":"C|A|120-359","de":"1.4","a":"1.3"},{"seg":"C|A|360-36000","de":"1.5","a":"1.4"},{"seg":"C|B|120-359","de":"1.3","a":"1.2"},{"seg":"C|B|360-36000","de":"1.5","a":"1.4"},{"seg":"C|C|120-359","de":"1.3","a":"1.2"},{"seg":"C|C|360-36000","de":"1.5","a":"1.4"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"PISOS":{"pa":{"id":2679,"name":"202608-MLB-IND-TC-FULL-UPSELL-PISOS-MINIMOS-BAU-PS-2"},"pb":{"id":2165,"name":"202606-MLB-IND-TC-FULL-UPSELL-PISOS-MINIMOS-BAU-PS-2"},"n_seg":16,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{},"fijos_new":[],"fijos_del":[],"exc_add":[],"exc_del":[],"exc_mod":["Redondeo_limite_final","KILLER_RCI_CURRENT_MAYOR_MAX_OPTIN","KILLER_RCI_CURRENT_MAYOR_MAX_NO_OPTIN","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":29,"n_exc_b":29},"OPF":{"pa":{"id":2717,"name":"202608-MLB-IND-TC FULL-UPSELL-BAU-BAU-OPF-3-V4"},"pb":{"id":2160,"name":"202606-MLB-IND-TC FULL-UPSELL-BAU-BAU-OPF-3"},"n_seg":9,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS_OPF":{"n":9,"n_seg":9,"delta":-0.1,"items":[{"seg":"A|A","de":"1.1","a":"1"},{"seg":"A|B","de":"1.1","a":"1"},{"seg":"A|C","de":"1","a":"0.9"},{"seg":"B|A","de":"1.1","a":"1"},{"seg":"B|B","de":"1","a":"0.9"},{"seg":"B|C","de":"1","a":"0.9"},{"seg":"C|A","de":"1","a":"0.9"},{"seg":"C|B","de":"1","a":"0.9"},{"seg":"C|C","de":"0.9","a":"0.8"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["Calculo_Multiplicador_Upsell_Final","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":38,"n_exc_b":23},"RIESGO MED. SOW":{"pa":{"id":2723,"name":"202608-MLB-IND-TC-FULL-UPSELL-BAU-RIESGO-MEDIO-PS-3-v4"},"pb":{"id":2163,"name":"202606-MLB-IND-TC-FULL-UPSELL-BAU-RIESGO-MEDIO-PS-3"},"n_seg":24,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":21,"n_seg":24,"delta":-0.1,"items":[{"seg":"A|D|120-359","de":"1.2","a":"1.1"},{"seg":"A|D|360-719","de":"1.4","a":"1.3"},{"seg":"A|D|720-36000","de":"1.3","a":"1.2"},{"seg":"A|E|120-359","de":"1.2","a":"1.1"},{"seg":"A|E|360-719","de":"1.4","a":"1.3"},{"seg":"A|E|720-36000","de":"1.2","a":"1.1"},{"seg":"B|D|120-359","de":"1.2","a":"1.1"},{"seg":"B|D|360-719","de":"1.4","a":"1.3"},{"seg":"B|D|720-36000","de":"1.2","a":"1.1"},{"seg":"=in(B,C,D)|E|360-719","de":"1.3","a":"1.2"},{"seg":"=in(B,C,D)|E|720-36000","de":"1.2","a":"1.1"},{"seg":"=in(C,D)|D|360-719","de":"1.3","a":"1.2"},{"seg":"=in(C,D)|D|720-36000","de":"1.2","a":"1.1"},{"seg":"D|A|120-359","de":"1.2","a":"1.1"},{"seg":"D|A|360-719","de":"1.4","a":"1.3"},{"seg":"D|A|720-36000","de":"1.2","a":"1.1"},{"seg":"D|B|120-359","de":"1.2","a":"1.1"},{"seg":"D|B|360-719","de":"1.4","a":"1.3"},{"seg":"D|B|720-36000","de":"1.2","a":"1.1"},{"seg":"D|C|360-719","de":"1.3","a":"1.2"},{"seg":"D|C|720-36000","de":"1.2","a":"1.1"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"REACTIVACION":{"pa":{"id":2712,"name":"202608-MLB-IND-TC-FULL-UPSELL-REACTIVACION-BAU-PS-1-V4"},"pb":{"id":2166,"name":"202606-MLB-IND-TC-FULL-UPSELL-REACTIVACION-BAU-PS-1"},"n_seg":9,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{"MULTIPLICADOR_POLITICA":["2","1.75"]},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["REDONDEO_LIMITE","KILLER_UPSELL_INSUFFICIENT","CALCULO_MULTIPLICADOR_UPSELL_FINAL","CALCULO_ATENDIMENTO_POST_UPSELL","CALCULO_RCI_CONJUNTA_POST_UPSELL"],"exc_reord":true,"n_exc_a":44,"n_exc_b":29},"ACTIVACION":{"pa":{"id":2719,"name":"202608-MLB-IND-TC-FULL-UPSELL-ACTIVACION-BAU-PS-1-v4"},"pb":{"id":2167,"name":"202606-MLB-IND-TC-FULL-UPSELL-ACTIVACION-BAU-PS-1"},"n_seg":16,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{"MULTIPLICADOR_POLITICA":["2","1.75"]},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_SILVER_12m","TOPE_GOLD_12m","TOPE_PLATINUM_12m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["REDONDEO_LIMITE","KILLER_UPSELL_INSUFFICIENT","CALCULO_MULTIPLICADOR_UPSELL_FINAL","CALCULO_ATENDIMENTO_POST_UPSELL","CALCULO_RCI_CONJUNTA_POST_UPSELL con optin","CALCULO_RCI_CONJUNTA_POST_UPSELL sin optin"],"exc_reord":true,"n_exc_a":32,"n_exc_b":25},"ADECUACION DE RENTA":{"pa":{"id":2720,"name":"202608-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1-v4"},"pb":{"id":2164,"name":"202606-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1"},"n_seg":48,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":48,"n_seg":48,"delta":-0.5,"items":[{"seg":"A|A|120-359","de":"3","a":"2.5"},{"seg":"A|B|120-359","de":"3","a":"2.5"},{"seg":"A|C|120-359","de":"3","a":"2.5"},{"seg":"A|D|120-359","de":"3","a":"2.5"},{"seg":"B|A|120-359","de":"3","a":"2.5"},{"seg":"B|B|120-359","de":"3","a":"2.5"},{"seg":"B|C|120-359","de":"3","a":"2.5"},{"seg":"B|D|120-359","de":"3","a":"2.5"},{"seg":"C|A|120-359","de":"3","a":"2.5"},{"seg":"C|B|120-359","de":"3","a":"2.5"},{"seg":"C|C|120-359","de":"3","a":"2.5"},{"seg":"C|D|120-359","de":"3","a":"2.5"},{"seg":"D|A|120-359","de":"3","a":"2.5"},{"seg":"D|B|120-359","de":"3","a":"2.5"},{"seg":"D|C|120-359","de":"3","a":"2.5"},{"seg":"D|D|120-359","de":"3","a":"2.5"},{"seg":"A|A|360-719","de":"3","a":"2.5"},{"seg":"A|B|360-719","de":"3","a":"2.5"},{"seg":"A|C|360-719","de":"3","a":"2.5"},{"seg":"A|D|360-719","de":"3","a":"2.5"},{"seg":"B|A|360-719","de":"3","a":"2.5"},{"seg":"B|B|360-719","de":"3","a":"2.5"},{"seg":"B|C|360-719","de":"3","a":"2.5"},{"seg":"B|D|360-719","de":"3","a":"2.5"},{"seg":"C|A|360-719","de":"3","a":"2.5"},{"seg":"C|B|360-719","de":"3","a":"2.5"},{"seg":"C|C|360-719","de":"3","a":"2.5"},{"seg":"C|D|360-719","de":"3","a":"2.5"},{"seg":"D|A|360-719","de":"3","a":"2.5"},{"seg":"D|B|360-719","de":"3","a":"2.5"},{"seg":"D|C|360-719","de":"3","a":"2.5"},{"seg":"D|D|360-719","de":"3","a":"2.5"},{"seg":"A|A|720-36000","de":"3","a":"2.5"},{"seg":"A|B|720-36000","de":"3","a":"2.5"},{"seg":"A|C|720-36000","de":"3","a":"2.5"},{"seg":"A|D|720-36000","de":"3","a":"2.5"},{"seg":"B|A|720-36000","de":"3","a":"2.5"},{"seg":"B|B|720-36000","de":"3","a":"2.5"},{"seg":"B|C|720-36000","de":"3","a":"2.5"},{"seg":"B|D|720-36000","de":"3","a":"2.5"},{"seg":"C|A|720-36000","de":"3","a":"2.5"},{"seg":"C|B|720-36000","de":"3","a":"2.5"},{"seg":"C|C|720-36000","de":"3","a":"2.5"},{"seg":"C|D|720-36000","de":"3","a":"2.5"},{"seg":"D|A|720-36000","de":"3","a":"2.5"},{"seg":"D|B|720-36000","de":"3","a":"2.5"},{"seg":"D|C|720-36000","de":"3","a":"2.5"},{"seg":"D|D|720-36000","de":"3","a":"2.5"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":40,"n_exc_b":25}}} ;
 
@@ -1450,7 +1454,12 @@ function initHistSelector() {
   const sel = document.getElementById('selHistPol');
   if (sel.options.length) return;
   sel.add(new Option('— Todas las políticas —', 'TODAS'));
-  Object.keys(POLICY_MAP || {}).forEach(p => { if (p !== 'CONSOLIDADO') sel.add(new Option(p, p)); });
+  // El value tiene que ser la clave de datos (POLICY_MAP[p]) y no la etiqueta: los datos
+  // usan el nombre del grupo de EOC ("RIESGO MED. SOW") y el selector muestra el nombre
+  // corto ("RIESGO MEDIO"). Filtrar por la etiqueta no matcheaba nada en esas dos políticas.
+  Object.keys(POLICY_MAP || {}).forEach(p => {
+    if (p !== 'CONSOLIDADO') sel.add(new Option(p, POLICY_MAP[p] || p));
+  });
   sel.value = 'TODAS';
   sel.addEventListener('change', renderHistorial);
 }
@@ -1464,10 +1473,11 @@ function renderHistorial() {
 
   // Orden cronológico: primero los meses de MONTHS (newest-first), después los que
   // sólo aparecen en las notas o en los comentarios.
+  const extrasPorMes = typeof CAMPANAS_EXTRA !== 'undefined' ? CAMPANAS_EXTRA : {};
   const deMonths = Object.keys(MONTHS || {});
-  const resto = [...new Set([...Object.keys(hist), ...Object.keys(comments)])]
+  const resto = [...new Set([...Object.keys(hist), ...Object.keys(comments), ...Object.keys(extrasPorMes)])]
     .filter(m => !deMonths.includes(m));
-  const meses = [...deMonths, ...resto].filter(m => hist[m] || comments[m]);
+  const meses = [...deMonths, ...resto].filter(m => hist[m] || comments[m] || extrasPorMes[m]);
 
   if (!meses.length) {
     document.getElementById('historialBody').innerHTML =
@@ -1536,6 +1546,46 @@ function renderHistorial() {
           ? '<div style="font-size:11px;color:var(--text3)">Sin cambios de killers para esta política en el período.</div>'
           : '');
 
+    // Campañas extra del mes (ejecuciones adicionales a la principal del condensador)
+    const extras = (typeof CAMPANAS_EXTRA !== 'undefined' ? CAMPANAS_EXTRA[mes] : null) || [];
+    const extrasVisibles = filtro === 'TODAS' ? extras : extras.filter(e => e.politica === filtro);
+    const extrasHtml = extrasVisibles.map(e => {
+      const dImp = e.funnel.users_to_impact - e.base.impactados;
+      const pct = e.base.impactados ? 100 * dImp / e.base.impactados : 0;
+      const kchip = (k, col) => `<div style="padding:4px 0">
+        <span style="font-size:11px;font-weight:700;color:${col}">${k.n}</span>
+        ${k.d ? `<div style="font-size:10px;color:#999;line-height:1.5;margin-top:1px">${k.d}</div>` : ''}
+      </div>`;
+      const pend = e.estado !== 'PROCESSED'
+        ? `<span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;background:rgba(251,140,0,0.15);color:#fb8c00;border:1px solid rgba(251,140,0,0.4)">${e.estado}</span>`
+        : '';
+      return `<div style="background:#111;border:1px solid #333;border-radius:6px;padding:12px 14px;margin-top:10px">
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+          <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent-yellow)">＋ Campaña extra</span>
+          <a href="${e.eoc_url}" target="_blank" style="font-size:11px;font-weight:700;color:#ccc;text-decoration:underline">${e.name}</a>
+          <span style="font-size:10px;color:#777">id ${e.campaign_id} · ${e.politica}</span>
+          ${pend}
+        </div>
+        <div style="font-size:11px;color:#bbb;line-height:1.6;margin-bottom:8px">${e.motivo}</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div style="flex:1;min-width:230px">
+            ${e.quitados.length ? `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888">🔴 Killers quitados (${e.quitados.length})</div>${e.quitados.map(k => kchip(k, '#e53935')).join('')}` : ''}
+            ${e.agregados.length ? `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-top:6px">🟢 Killers agregados (${e.agregados.length})</div>${e.agregados.map(k => kchip(k, '#27ae60')).join('')}` : ''}
+          </div>
+          <div style="flex:1;min-width:230px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:4px">Impacto vs la principal</div>
+            <div style="font-size:11px;color:#ccc;line-height:1.8">
+              Sobreviven a killers: <b style="color:#fff">${fmt(e.sobreviven)}</b> <span style="color:#777">vs ${fmt(e.base.sobreviven)}</span><br>
+              Pasan la política: <b style="color:#fff">${fmt(e.funnel.users_to_impact)}</b> <span style="color:#777">vs ${fmt(e.base.impactados)}</span>
+              <b style="color:${dImp >= 0 ? 'var(--green)' : 'var(--red)'}">(${dImp > 0 ? '+' : ''}${fmt(dImp)} · ${pct > 0 ? '+' : ''}${pct.toFixed(1)}%)</b><br>
+              ${e.gi_users != null ? `Impacto real: <b style="color:var(--accent-yellow)">${fmt(e.gi_users)}</b> <span style="color:#777">(${fmt(e.gc_users)} quedan en control, ${e.gc_pct}%)</span>` : ''}
+            </div>
+            ${e.estado !== 'PROCESSED' ? `<div style="font-size:10px;color:#fb8c00;margin-top:6px;line-height:1.5">⚠ Ejecución en ${e.estado}: los números pueden moverse hasta que pase a PROCESSED.</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
     const meta = MONTHS[mes] && MONTHS[mes].meta ? MONTHS[mes].meta : null;
     const sub = meta
       ? `<a href="${meta.eoc_url}" target="_blank" style="font-size:10px;color:#888;text-decoration:underline">${meta.campaign}</a>`
@@ -1544,10 +1594,10 @@ function renderHistorial() {
     return `<div style="background:#1a1a1a;border-radius:6px;padding:14px 16px;margin-bottom:12px;border-left:3px solid var(--accent-yellow)">
       <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <span style="font-size:15px;font-weight:800;color:var(--accent-yellow)">${mes}</span>
-        <span style="font-size:10px;color:var(--text3)">${totalCambios} cambio${totalCambios === 1 ? '' : 's'} de killers${notas.length ? ` · ${notas.length} novedad${notas.length === 1 ? '' : 'es'} de política` : ''}</span>
+        <span style="font-size:10px;color:var(--text3)">${totalCambios} cambio${totalCambios === 1 ? '' : 's'} de killers${notas.length ? ` · ${notas.length} novedad${notas.length === 1 ? '' : 'es'} de política` : ''}${extrasVisibles.length ? ` · ${extrasVisibles.length} campaña${extrasVisibles.length === 1 ? '' : 's'} extra` : ''}</span>
         ${sub}
       </div>
-      ${novedades}${killersBlock}
+      ${novedades}${killersBlock}${extrasHtml}
     </div>`;
   }).join('');
 
