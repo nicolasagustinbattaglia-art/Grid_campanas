@@ -99,3 +99,30 @@ console.log('cards:', d.getElementById('simMetricsRow').querySelectorAll('.metri
 console.log('funnel:', d.getElementById('simFunnelBody').querySelectorAll('.funnel-row').length);
 "
 ```
+
+## Diff de políticas (hoja Historial)
+
+`queries/fetch_policies.py` baja el detalle crudo de las políticas desde el MCP de EOC vía
+HTTP y lo persiste en `data/policies/{policy_id}.json`. Se usa el fallback HTTP en lugar de
+las tools MCP a propósito: 18 políticas pasando por el contexto de un agente se transcriben
+a mano y eso es un vector de error grande. Acá el payload llega a disco tal cual lo devuelve EOC.
+
+`queries/diff_policies.py` compara las políticas de dos campañas y genera el diff.
+
+**Reglas de matcheo** (importan para no producir un diff que engañe):
+
+- Los segmentos se matchean por su **tupla de condiciones normalizada**, nunca por
+  `attribute_index` ni por ids. El índice es sólo orden de carga en la UI, y los
+  `parameter_id` / `attribute_definition_id` son distintos en cada política.
+- Los nombres de columna se **normalizan a mayúsculas**: la misma columna aparece como
+  `withdraw_limit` en una política y `WITHDRAW_LIMIT` en otra.
+- Los valores de condición se toman como **string literal** — pueden ser expresiones (`=in(A,B)`).
+- Lo que no matchea **no se fuerza**: va a `seg_solo_a` / `seg_solo_b` y la UI lo marca.
+- Los valores viven en `parameter_values` para los settings y en `parameter_modify` para las
+  exceptions. Leer sólo uno devuelve "sin cambios" en silencio, que es el peor modo de fallar.
+- En exceptions se compara nombre, contenido **y orden**: la pipeline es secuencial, así que
+  insertar una excepción en el medio cambia el resultado aunque ninguna otra se toque.
+
+Para actualizarlo el mes que viene: editar el dict `POLICIES` de los dos scripts con los
+`policy_id` de cada campaña (salen de `MONTHS[mes].meta.policies` del HTML), correr
+`fetch_policies.py` y después `diff_policies.py`, y regenerar `data/pol_diff_ui.json`.

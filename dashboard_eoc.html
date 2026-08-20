@@ -884,6 +884,11 @@
       <div id="diffBody"></div>
     </div>
 
+    <div style="margin-bottom:28px">
+      <div class="section-label">Cambios de política <span style="font-size:10px;font-weight:400;color:var(--text3)">(parámetros por segmento, comparación automática contra EOC)</span></div>
+      <div id="polDiffBody"></div>
+    </div>
+
     <div>
       <div class="section-label">Línea de tiempo <span style="font-size:10px;font-weight:400;color:var(--text3)">(novedades declaradas, del mes más reciente al más antiguo)</span></div>
       <div id="historialBody"></div>
@@ -1293,6 +1298,90 @@ function renderCampDiff(filtro) {
     '<div style="color:var(--text3);padding:16px">Sin datos para esta política.</div>';
 }
 
+// ===== DIFF DE POLITICAS (Historial) =====
+const POL_DIFF = {"a":{"mes":"Ago-26","campaign_id":6816},"b":{"mes":"Jul-26","campaign_id":6126},"policies":{"BAU":{"pa":{"id":2721,"name":"202608-MLB-IND-TC-FULL-UPSELL-BAU-BAU-PS-v4"},"pb":{"id":2159,"name":"202606-MLB-IND-TC-FULL-UPSELL-BAU-BAU-PS-3 "},"n_seg":24,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":24,"n_seg":24,"delta":-0.1,"items":[{"seg":"A|A|120-359","de":"1.4","a":"1.3"},{"seg":"A|A|360-719","de":"1.5","a":"1.4"},{"seg":"A|A|720-36000","de":"1.5","a":"1.4"},{"seg":"A|C|120-359","de":"1.2","a":"1.1"},{"seg":"A|C|360-719","de":"1.4","a":"1.3"},{"seg":"A|C|720-36000","de":"1.3","a":"1.2"},{"seg":"=in(A,B)|B|120-359","de":"1.3","a":"1.2"},{"seg":"=in(A,B)|B|360-719","de":"1.5","a":"1.4"},{"seg":"=in(A,B)|B|720-36000","de":"1.4","a":"1.3"},{"seg":"B|A|120-359","de":"1.3","a":"1.2"},{"seg":"B|A|360-719","de":"1.5","a":"1.4"},{"seg":"B|A|720-36000","de":"1.4","a":"1.3"},{"seg":"B|C|120-359","de":"1.2","a":"1.1"},{"seg":"B|C|360-719","de":"1.4","a":"1.3"},{"seg":"B|C|720-36000","de":"1.2","a":"1.1"},{"seg":"C|A|120-359","de":"1.2","a":"1.1"},{"seg":"C|A|360-719","de":"1.4","a":"1.3"},{"seg":"C|A|720-36000","de":"1.3","a":"1.2"},{"seg":"C|B|120-359","de":"1.2","a":"1.1"},{"seg":"C|B|360-719","de":"1.4","a":"1.3"},{"seg":"C|B|720-36000","de":"1.3","a":"1.2"},{"seg":"C|C|120-359","de":"1.2","a":"1.1"},{"seg":"C|C|360-719","de":"1.4","a":"1.3"},{"seg":"C|C|720-36000","de":"1.2","a":"1.1"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"JOURNEY 1A":{"pa":{"id":2678,"name":"202608-MLB-IND-TC-JOURNEY-UPSELL-BAU-FLEXIBILIZACIONREGLAS-1ERAÑO-1"},"pb":{"id":2168,"name":"202606-MLB-IND-TC-JOURNEY-UPSELL-BAU-FLEXIBILIZACIONREGLAS-1ERAÑO-1"},"n_seg":40,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{},"fijos_new":[],"fijos_del":[],"exc_add":[],"exc_del":[],"exc_mod":["Redondeo_limite_final","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL","EXCLUSION Upsell Insuficiente"],"exc_reord":false,"n_exc_a":19,"n_exc_b":19},"VIP MP":{"pa":{"id":2722,"name":"202608-MLB-IND-TC FULL-UPSELL-BAU-VIP-MP-BAU-4-v4"},"pb":{"id":2161,"name":"202606-MLB-IND-TC FULL-UPSELL-BAU-VIP-MP-BAU-4"},"n_seg":18,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":18,"n_seg":18,"delta":-0.1,"items":[{"seg":"A|A|120-359","de":"1.6","a":"1.5"},{"seg":"A|A|360-36000","de":"1.7","a":"1.6"},{"seg":"A|B|120-359","de":"1.4","a":"1.3"},{"seg":"A|B|360-36000","de":"1.7","a":"1.6"},{"seg":"A|C|120-359","de":"1.4","a":"1.3"},{"seg":"A|C|360-36000","de":"1.5","a":"1.4"},{"seg":"B|A|120-359","de":"1.4","a":"1.3"},{"seg":"B|A|360-36000","de":"1.7","a":"1.6"},{"seg":"B|B|120-359","de":"1.4","a":"1.3"},{"seg":"B|B|360-36000","de":"1.5","a":"1.4"},{"seg":"B|C|120-359","de":"1.3","a":"1.2"},{"seg":"B|C|360-36000","de":"1.5","a":"1.4"},{"seg":"C|A|120-359","de":"1.4","a":"1.3"},{"seg":"C|A|360-36000","de":"1.5","a":"1.4"},{"seg":"C|B|120-359","de":"1.3","a":"1.2"},{"seg":"C|B|360-36000","de":"1.5","a":"1.4"},{"seg":"C|C|120-359","de":"1.3","a":"1.2"},{"seg":"C|C|360-36000","de":"1.5","a":"1.4"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"PISOS":{"pa":{"id":2679,"name":"202608-MLB-IND-TC-FULL-UPSELL-PISOS-MINIMOS-BAU-PS-2"},"pb":{"id":2165,"name":"202606-MLB-IND-TC-FULL-UPSELL-PISOS-MINIMOS-BAU-PS-2"},"n_seg":16,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{},"fijos_new":[],"fijos_del":[],"exc_add":[],"exc_del":[],"exc_mod":["Redondeo_limite_final","KILLER_RCI_CURRENT_MAYOR_MAX_OPTIN","KILLER_RCI_CURRENT_MAYOR_MAX_NO_OPTIN","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":29,"n_exc_b":29},"OPF":{"pa":{"id":2717,"name":"202608-MLB-IND-TC FULL-UPSELL-BAU-BAU-OPF-3-V4"},"pb":{"id":2160,"name":"202606-MLB-IND-TC FULL-UPSELL-BAU-BAU-OPF-3"},"n_seg":9,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS_OPF":{"n":9,"n_seg":9,"delta":-0.1,"items":[{"seg":"A|A","de":"1.1","a":"1"},{"seg":"A|B","de":"1.1","a":"1"},{"seg":"A|C","de":"1","a":"0.9"},{"seg":"B|A","de":"1.1","a":"1"},{"seg":"B|B","de":"1","a":"0.9"},{"seg":"B|C","de":"1","a":"0.9"},{"seg":"C|A","de":"1","a":"0.9"},{"seg":"C|B","de":"1","a":"0.9"},{"seg":"C|C","de":"0.9","a":"0.8"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["Calculo_Multiplicador_Upsell_Final","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":38,"n_exc_b":23},"RIESGO MED. SOW":{"pa":{"id":2723,"name":"202608-MLB-IND-TC-FULL-UPSELL-BAU-RIESGO-MEDIO-PS-3-v4"},"pb":{"id":2163,"name":"202606-MLB-IND-TC-FULL-UPSELL-BAU-RIESGO-MEDIO-PS-3"},"n_seg":24,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":21,"n_seg":24,"delta":-0.1,"items":[{"seg":"A|D|120-359","de":"1.2","a":"1.1"},{"seg":"A|D|360-719","de":"1.4","a":"1.3"},{"seg":"A|D|720-36000","de":"1.3","a":"1.2"},{"seg":"A|E|120-359","de":"1.2","a":"1.1"},{"seg":"A|E|360-719","de":"1.4","a":"1.3"},{"seg":"A|E|720-36000","de":"1.2","a":"1.1"},{"seg":"B|D|120-359","de":"1.2","a":"1.1"},{"seg":"B|D|360-719","de":"1.4","a":"1.3"},{"seg":"B|D|720-36000","de":"1.2","a":"1.1"},{"seg":"=in(B,C,D)|E|360-719","de":"1.3","a":"1.2"},{"seg":"=in(B,C,D)|E|720-36000","de":"1.2","a":"1.1"},{"seg":"=in(C,D)|D|360-719","de":"1.3","a":"1.2"},{"seg":"=in(C,D)|D|720-36000","de":"1.2","a":"1.1"},{"seg":"D|A|120-359","de":"1.2","a":"1.1"},{"seg":"D|A|360-719","de":"1.4","a":"1.3"},{"seg":"D|A|720-36000","de":"1.2","a":"1.1"},{"seg":"D|B|120-359","de":"1.2","a":"1.1"},{"seg":"D|B|360-719","de":"1.4","a":"1.3"},{"seg":"D|B|720-36000","de":"1.2","a":"1.1"},{"seg":"D|C|360-719","de":"1.3","a":"1.2"},{"seg":"D|C|720-36000","de":"1.2","a":"1.1"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE"],"fijos_del":[],"exc_add":["FLAG_TOPEO"],"exc_del":[],"exc_mod":["TOPEO_LIM_RENTA","Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":51,"n_exc_b":50},"REACTIVACION":{"pa":{"id":2712,"name":"202608-MLB-IND-TC-FULL-UPSELL-REACTIVACION-BAU-PS-1-V4"},"pb":{"id":2166,"name":"202606-MLB-IND-TC-FULL-UPSELL-REACTIVACION-BAU-PS-1"},"n_seg":9,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{"MULTIPLICADOR_POLITICA":["2","1.75"]},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["REDONDEO_LIMITE","KILLER_UPSELL_INSUFFICIENT","CALCULO_MULTIPLICADOR_UPSELL_FINAL","CALCULO_ATENDIMENTO_POST_UPSELL","CALCULO_RCI_CONJUNTA_POST_UPSELL"],"exc_reord":true,"n_exc_a":44,"n_exc_b":29},"ACTIVACION":{"pa":{"id":2719,"name":"202608-MLB-IND-TC-FULL-UPSELL-ACTIVACION-BAU-PS-1-v4"},"pb":{"id":2167,"name":"202606-MLB-IND-TC-FULL-UPSELL-ACTIVACION-BAU-PS-1"},"n_seg":16,"seg_solo_a":[],"seg_solo_b":[],"params":{},"fijos_ch":{"MULTIPLICADOR_POLITICA":["2","1.75"]},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_SILVER_12m","TOPE_GOLD_12m","TOPE_PLATINUM_12m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["REDONDEO_LIMITE","KILLER_UPSELL_INSUFFICIENT","CALCULO_MULTIPLICADOR_UPSELL_FINAL","CALCULO_ATENDIMENTO_POST_UPSELL","CALCULO_RCI_CONJUNTA_POST_UPSELL con optin","CALCULO_RCI_CONJUNTA_POST_UPSELL sin optin"],"exc_reord":true,"n_exc_a":32,"n_exc_b":25},"ADECUACION DE RENTA":{"pa":{"id":2720,"name":"202608-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1-v4"},"pb":{"id":2164,"name":"202606-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1"},"n_seg":48,"seg_solo_a":[],"seg_solo_b":[],"params":{"MULTIP_NOM_UPS":{"n":48,"n_seg":48,"delta":-0.5,"items":[{"seg":"A|A|120-359","de":"3","a":"2.5"},{"seg":"A|B|120-359","de":"3","a":"2.5"},{"seg":"A|C|120-359","de":"3","a":"2.5"},{"seg":"A|D|120-359","de":"3","a":"2.5"},{"seg":"B|A|120-359","de":"3","a":"2.5"},{"seg":"B|B|120-359","de":"3","a":"2.5"},{"seg":"B|C|120-359","de":"3","a":"2.5"},{"seg":"B|D|120-359","de":"3","a":"2.5"},{"seg":"C|A|120-359","de":"3","a":"2.5"},{"seg":"C|B|120-359","de":"3","a":"2.5"},{"seg":"C|C|120-359","de":"3","a":"2.5"},{"seg":"C|D|120-359","de":"3","a":"2.5"},{"seg":"D|A|120-359","de":"3","a":"2.5"},{"seg":"D|B|120-359","de":"3","a":"2.5"},{"seg":"D|C|120-359","de":"3","a":"2.5"},{"seg":"D|D|120-359","de":"3","a":"2.5"},{"seg":"A|A|360-719","de":"3","a":"2.5"},{"seg":"A|B|360-719","de":"3","a":"2.5"},{"seg":"A|C|360-719","de":"3","a":"2.5"},{"seg":"A|D|360-719","de":"3","a":"2.5"},{"seg":"B|A|360-719","de":"3","a":"2.5"},{"seg":"B|B|360-719","de":"3","a":"2.5"},{"seg":"B|C|360-719","de":"3","a":"2.5"},{"seg":"B|D|360-719","de":"3","a":"2.5"},{"seg":"C|A|360-719","de":"3","a":"2.5"},{"seg":"C|B|360-719","de":"3","a":"2.5"},{"seg":"C|C|360-719","de":"3","a":"2.5"},{"seg":"C|D|360-719","de":"3","a":"2.5"},{"seg":"D|A|360-719","de":"3","a":"2.5"},{"seg":"D|B|360-719","de":"3","a":"2.5"},{"seg":"D|C|360-719","de":"3","a":"2.5"},{"seg":"D|D|360-719","de":"3","a":"2.5"},{"seg":"A|A|720-36000","de":"3","a":"2.5"},{"seg":"A|B|720-36000","de":"3","a":"2.5"},{"seg":"A|C|720-36000","de":"3","a":"2.5"},{"seg":"A|D|720-36000","de":"3","a":"2.5"},{"seg":"B|A|720-36000","de":"3","a":"2.5"},{"seg":"B|B|720-36000","de":"3","a":"2.5"},{"seg":"B|C|720-36000","de":"3","a":"2.5"},{"seg":"B|D|720-36000","de":"3","a":"2.5"},{"seg":"C|A|720-36000","de":"3","a":"2.5"},{"seg":"C|B|720-36000","de":"3","a":"2.5"},{"seg":"C|C|720-36000","de":"3","a":"2.5"},{"seg":"C|D|720-36000","de":"3","a":"2.5"},{"seg":"D|A|720-36000","de":"3","a":"2.5"},{"seg":"D|B|720-36000","de":"3","a":"2.5"},{"seg":"D|C|720-36000","de":"3","a":"2.5"},{"seg":"D|D|720-36000","de":"3","a":"2.5"}]}},"fijos_ch":{},"fijos_new":["FLAG_TOPE","LIM_RENTA_TOPE"],"fijos_del":[],"exc_add":["TOPE_BRONZE_12m","TOPE_BRONZE_12m_24m","TOPE_BRONZE_24m","TOPE_SILVER_12m","TOPE_SILVER_12m_24m","TOPE_SILVER_24m","TOPE_GOLD_12m","TOPE_GOLD_12m_24m","TOPE_GOLD_24m","TOPE_PLATINUM_12m","TOPE_PLATINUM_12m_24m","TOPE_PLATINUM_24m","EXCLUSION_LIM_RENTA","TOPEO_LIM_RENTA","FLAG_TOPEO"],"exc_del":[],"exc_mod":["Redondeo_limite_final","KILLER_UPSELL_INSUFFICIENT","Calculo_Multiplicador_Upsell_Final","Calculo_ATENDIMENTO_POST_UPSELL"],"exc_reord":false,"n_exc_a":40,"n_exc_b":25}}} ;
+
+// Diff de parámetros de política entre dos campañas, abierto por segmento.
+//
+// Los segmentos se matchean por su tupla de condiciones (rating upsell | rating BHV |
+// rango de antigüedad), no por id ni por índice: cada política tiene ids propios y el
+// índice es sólo orden de carga en la UI. Ver queries/diff_policies.py.
+function renderPolDiff(filtro) {
+  const D = typeof POL_DIFF !== 'undefined' ? POL_DIFF : null;
+  const cont = document.getElementById('polDiffBody');
+  if (!D) { cont.innerHTML = '<div style="color:var(--text3);padding:16px">Sin datos de políticas.</div>'; return; }
+
+  const pols = Object.keys(D.policies).filter(p => filtro === 'TODAS' || p === filtro);
+  const lista = (arr, col, max) => {
+    const m = max || 6;
+    const vis = arr.slice(0, m).map(n =>
+      `<span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;margin:2px 4px 2px 0;background:${col}1a;color:${col};border:1px solid ${col}55">${n}</span>`).join('');
+    return vis + (arr.length > m ? `<span style="font-size:10px;color:var(--text3)"> +${arr.length - m} más</span>` : '');
+  };
+  const sub = t => `<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin:10px 0 4px">${t}</div>`;
+
+  const html = pols.map(pol => {
+    const d = D.policies[pol];
+    let cuerpo = '';
+
+    // Parámetros por segmento
+    const ps = Object.entries(d.params);
+    if (ps.length) {
+      cuerpo += sub(`Parámetros por segmento (${d.n_seg} segmentos)`);
+      cuerpo += ps.map(([p, v]) => {
+        const parcial = v.n < v.n_seg;
+        const dtxt = v.delta != null
+          ? `<b style="color:${v.delta < 0 ? 'var(--red)' : 'var(--green)'}">${v.delta > 0 ? '+' : ''}${v.delta}</b> uniforme`
+          : '<b style="color:var(--amber)">deltas mixtos</b>';
+        const ej = v.items.slice(0, 3).map(it =>
+          `<span style="color:var(--text3)">${it.seg}</span> ${it.de}→${it.a}`).join(' · ');
+        return `<div style="padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="font-size:11px"><b style="color:var(--accent)">${p}</b>
+            <span style="color:var(--text2)"> — ${dtxt} en ${v.n}/${v.n_seg} segmentos</span>
+            ${parcial ? '<span style="font-size:9px;color:var(--amber);margin-left:6px">⚠ no aplica a todos</span>' : ''}
+          </div>
+          <div style="font-size:10px;color:#999;margin-top:3px">${ej}${v.items.length > 3 ? ' …' : ''}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Parámetros fijos (valen para toda la política, sin segmentar)
+    const fch = Object.entries(d.fijos_ch || {});
+    if (fch.length || (d.fijos_new || []).length || (d.fijos_del || []).length) {
+      cuerpo += sub('Parámetros fijos');
+      cuerpo += fch.map(([k, v]) =>
+        `<div style="padding:5px 0;border-bottom:1px solid var(--border);font-size:11px">
+          <b style="color:var(--accent)">${k}</b> <span style="color:#999">${v[0]} → </span><b>${v[1]}</b></div>`).join('');
+      if ((d.fijos_new || []).length) cuerpo += `<div style="margin-top:5px">${lista(d.fijos_new, '#27ae60')}<span style="font-size:9px;color:var(--text3)">nuevos</span></div>`;
+      if ((d.fijos_del || []).length) cuerpo += `<div style="margin-top:5px">${lista(d.fijos_del, '#e53935')}<span style="font-size:9px;color:var(--text3)">eliminados</span></div>`;
+    }
+
+    // Exceptions: es la pipeline de cálculo, por eso importa también el orden
+    if (d.exc_add.length || d.exc_del.length || d.exc_mod.length || d.exc_reord) {
+      cuerpo += sub(`Excepciones de política (${d.n_exc_a} vs ${d.n_exc_b})`);
+      if (d.exc_add.length) cuerpo += `<div style="margin-bottom:5px"><span style="font-size:10px;color:#888">🟢 Agregadas (${d.exc_add.length}): </span>${lista(d.exc_add, '#27ae60')}</div>`;
+      if (d.exc_del.length) cuerpo += `<div style="margin-bottom:5px"><span style="font-size:10px;color:#888">🔴 Eliminadas (${d.exc_del.length}): </span>${lista(d.exc_del, '#e53935')}</div>`;
+      if (d.exc_mod.length) cuerpo += `<div style="margin-bottom:5px"><span style="font-size:10px;color:#888">🟡 Modificadas (${d.exc_mod.length}): </span>${lista(d.exc_mod, '#fb8c00')}</div>`;
+      if (d.exc_reord) cuerpo += `<div style="font-size:10px;color:var(--amber);margin-top:4px">⚠ Cambió el orden de ejecución. La pipeline es secuencial: cada excepción lee el resultado de la anterior, así que reordenar altera el cálculo aunque ninguna cambie por dentro.</div>`;
+    }
+
+    if ((d.seg_solo_a || []).length || (d.seg_solo_b || []).length) {
+      cuerpo += `<div style="font-size:10px;color:var(--amber);margin-top:8px">⚠ ${d.seg_solo_a.length} segmentos sólo en ${D.a.mes} y ${d.seg_solo_b.length} sólo en ${D.b.mes} — la grilla de segmentación cambió, esos no son comparables.</div>`;
+    }
+    if (!cuerpo) cuerpo = '<div style="font-size:11px;color:var(--text3)">Sin cambios de parámetros.</div>';
+
+    return `<div style="background:#1a1a1a;border-radius:6px;padding:14px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+        <span style="font-size:14px;font-weight:800;color:var(--accent-yellow)">${pol}</span>
+        <span style="font-size:10px;color:var(--text3)">política ${d.pa.id} (${D.a.mes}) vs ${d.pb.id} (${D.b.mes})</span>
+      </div>
+      ${cuerpo}
+    </div>`;
+  }).join('');
+
+  cont.innerHTML = html || '<div style="color:var(--text3);padding:16px">Sin datos para esta política.</div>';
+}
+
 // ===== HISTORIAL DE CAMBIOS =====
 // KILLER_NOTES está indexado política → killer → mes → nota. Acá se invierte a
 // mes → tipo de cambio → killer → políticas afectadas, para armar la línea de tiempo.
@@ -1340,6 +1429,7 @@ function initHistSelector() {
 function renderHistorial() {
   const filtro = document.getElementById('selHistPol').value;
   renderCampDiff(filtro);
+  renderPolDiff(filtro);
   const hist = buildHistorial();
   const comments = typeof MONTH_COMMENTS !== 'undefined' ? MONTH_COMMENTS : {};
 
