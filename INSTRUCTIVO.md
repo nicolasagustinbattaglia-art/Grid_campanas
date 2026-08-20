@@ -1429,6 +1429,64 @@ no son políticas nuevas, son otro producto con su propia hoja.
 > en Ago vs Jul). La tasa de corte de cada killer — excluidos sobre los que le entran — sí es
 > comparable; con umbral de 2pp quedan 17 movimientos reales.
 
+### Campañas extra del mes
+
+Además de la campaña principal del condensador, un mes puede tener **campañas adicionales**:
+ejecuciones aparte, sobre una sola política, con killers relajados para cerrar un gap de volumen.
+Se cargan en `CAMPANAS_EXTRA` y se muestran dentro del bloque del mes en la línea de tiempo, con
+el motivo, los killers tocados, el impacto contra la campaña principal y un bloque de
+verificaciones.
+
+```js
+const CAMPANAS_EXTRA = {
+  "[MES]": [{
+    campaign_id, name, exec_id, estado,     // estado: PROCESSED / PENDING / ...
+    politica: "[nombre del grupo en EOC]",  // ej "RIESGO MED. SOW" — no la etiqueta corta
+    eoc_url, motivo,
+    quitados:  [{ n: "K-...", d: "por qué / por qué se reemplazó" }],
+    agregados: [{ n: "K-...", d: "qué contempla" }],
+    base: { campaign_id, grupo, impactados, sobreviven, n_killers },  // la campaña principal
+    funnel, n_killers, sobreviven,
+    gc_pct, gc_users, gi_users,             // el impacto real es gi_users, no users_to_impact
+    verificaciones: [{ ok: true|false|null, t: "..." }],
+  }]
+};
+```
+
+**Siempre verificar los killers declarados contra EOC** antes de cargarlos. El diff automático ya
+encontró notas incorrectas más de una vez.
+
+> **⚠ `users_to_impact` incluye el grupo control.** Si la campaña tiene GC, el volumen incremental
+> real es `users_to_impact − gc_users`. En la 6970 de Ago-26 la diferencia fue 62.659 vs 56.394.
+
+> **⚠ Chequear el `execution_state`.** Si está en `PENDING` los números todavía pueden moverse;
+> conviene volver a traerlos cuando pase a `PROCESSED`. La tarjeta lo marca con un badge.
+
+#### Verificar qué se excluye y dónde
+
+Cuando una campaña relaja killers, conviene chequear que las exclusiones que importan sigan en
+pie. Hay **tres lugares** donde se puede excluir población, y hay que mirar los tres:
+
+| Nivel | Cómo se consulta |
+|---|---|
+| Universo | `get_campaign_detail(id, sections=["universe"])` |
+| Política | `get_policy_detail(policy_id)` → `attributes`, `settings[].conditions`, `exceptions` |
+| Killers | `get_campaign_execution_dashboard(id, include="killer_rules")` |
+
+El script `queries/check_sellers.py` hace exactamente esto para el caso de sellers y sirve de
+plantilla para cualquier otra exclusión.
+
+**Resultado del chequeo en la 6970 (Ago-26):** los sellers se excluyen **sólo** por el killer
+`K-SELLERS-2` (`PROSPECT_UNIVERSE.RISK_MANAGEMENT_TAG == MERCHANT`). La política de Riesgo Medio
+segmenta únicamente por antigüedad y ratings, y el universo (`MLB / CROSS / TC - ACEPTADA`) no
+filtra por tipo de cliente. Verificado en BQ: de los 62.659 impactados, **0** tienen tag MERCHANT,
+y los 3,57M de merchants del universo quedaron todos afuera.
+
+> **⚠ La exclusión de sellers cuelga de un solo killer.** No hay respaldo en política ni universo.
+> Si en una iteración se saca o modifica `K-SELLERS-2` buscando volumen, entran 3,5M de merchants
+> sin que nada más los frene. Tenerlo presente justamente en las campañas extra, que existen para
+> relajar killers.
+
 ### Cambios de política
 
 Los scripts están en el repo: `queries/fetch_policies.py` baja las políticas crudas y

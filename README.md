@@ -158,3 +158,27 @@ a mano y eso es un vector de error grande. Acá el payload llega a disco tal cua
 Para actualizarlo el mes que viene: editar el dict `POLICIES` de los dos scripts con los
 `policy_id` de cada campaña (salen de `MONTHS[mes].meta.policies` del HTML), correr
 `fetch_policies.py` y después `diff_policies.py`, y regenerar `data/pol_diff_ui.json`.
+
+## Verificar exclusiones (universo / política / killers)
+
+Cuando una campaña relaja killers conviene chequear que las exclusiones que importan sigan en pie.
+Hay **tres niveles** donde se puede excluir población y hay que mirar los tres:
+
+| Nivel | Cómo se consulta |
+|---|---|
+| Universo | `get_campaign_detail(id, sections=["universe"])` |
+| Política | `get_policy_detail(policy_id)` → `attributes`, `settings[].conditions`, `exceptions` |
+| Killers | `get_campaign_execution_dashboard(id, include="killer_rules")` |
+
+`queries/check_sellers.py` hace exactamente esto para sellers y sirve de plantilla para cualquier
+otra exclusión.
+
+**Hallazgo (Ago-26, campaña 6970):** los sellers se excluyen **sólo** por el killer `K-SELLERS-2`
+(`PROSPECT_UNIVERSE.RISK_MANAGEMENT_TAG == MERCHANT`). La política de Riesgo Medio segmenta
+únicamente por antigüedad y ratings; el universo (`MLB / CROSS / TC - ACEPTADA`) no filtra por tipo
+de cliente. Verificado en BQ: de 62.659 impactados, **0** con tag MERCHANT, y los 3,57M de merchants
+del universo quedaron todos afuera.
+
+> ⚠ **No hay defensa en profundidad.** Si se saca o modifica `K-SELLERS-2` buscando volumen, entran
+> 3,5M de merchants sin que nada más los frene. Vale tenerlo presente en las campañas extra, que
+> justamente existen para relajar killers.
