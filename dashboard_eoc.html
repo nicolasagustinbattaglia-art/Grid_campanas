@@ -874,7 +874,12 @@
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap">
       <span class="ctrl-label">Política</span>
       <select id="selHistPol"></select>
-      <span style="font-size:10px;color:var(--text3)">El filtro aplica a las dos secciones.</span>
+      <span style="font-size:10px;color:var(--text3)">El filtro aplica a las tres secciones.</span>
+    </div>
+
+    <div style="margin-bottom:28px">
+      <div class="section-label">Línea de tiempo <span style="font-size:10px;font-weight:400;color:var(--text3)">(novedades declaradas, del mes más reciente al más antiguo)</span></div>
+      <div id="historialBody"></div>
     </div>
 
     <div style="margin-bottom:28px">
@@ -884,14 +889,9 @@
       <div id="diffBody"></div>
     </div>
 
-    <div style="margin-bottom:28px">
+    <div>
       <div class="section-label">Cambios de política <span style="font-size:10px;font-weight:400;color:var(--text3)">(parámetros por segmento, comparación automática contra EOC)</span></div>
       <div id="polDiffBody"></div>
-    </div>
-
-    <div>
-      <div class="section-label">Línea de tiempo <span style="font-size:10px;font-weight:400;color:var(--text3)">(novedades declaradas, del mes más reciente al más antiguo)</span></div>
-      <div id="historialBody"></div>
     </div>
   </div>
 
