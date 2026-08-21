@@ -14,7 +14,8 @@ mes a mes con los resultados de cada campaña.
 UPSELL INDIVIDUOS  |  UPSELL SELLERS      ← nav de producto
   ├─ Campañas               ← comparación mes a mes (flujo mensual del instructivo)
   ├─ Simulaciones           ← comparación entre versiones de un experimento
-  └─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
+  ├─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
+  └─ Killers                ← reglas duras y killers específicos por política
 ```
 
 Las sub-hojas existen sólo dentro de **Upsell Individuos**. Al pasar a Sellers la barra desaparece.
@@ -53,6 +54,25 @@ Tres bloques, con un filtro de política común:
 3. **Cambios de política** — parámetros por segmento, automático. Ver sección más abajo.
 
 Los bloques 2 y 3 sirven para **auditar** el bloque 1: ya detectaron notas incorrectas.
+
+### Killers
+Separa los killers de una campaña en dos vistas, al estilo de la lámina de reglas duras:
+
+- **Reglas duras** — los que aplican a **todas** las políticas, con su definición de negocio y el
+  volumen total excluido.
+- **Killers específicos** — matriz de los restantes con tick verde en las políticas donde aplica
+  cada uno, ordenados por cobertura descendente.
+
+Filtros de **mes** y **campaña** (el de campaña se repuebla al cambiar de mes) más un filtro de
+texto común a las dos tablas. Datos en `data/killers_matriz.json`, indexado `mes → [campañas]`.
+
+> Cuando una campaña corre sobre **una sola política** —el caso de las extra— la separación no
+> aplica: todos sus killers son duros por definición. El encabezado lo avisa en lugar de mostrar
+> una matriz de una columna, que se leería como un dato cuando no lo es.
+
+Evolución de las reglas duras: **25 (Jun) → 26 (Jul) → 29 (Ago)**, con el universo de killers
+distintos casi estable (72 → 73 → 78). No se agregan killers sueltos: se estandarizan los que ya
+existían. Es un endurecimiento progresivo y transversal.
 
 ## Contenido del repo
 
@@ -182,3 +202,29 @@ del universo quedaron todos afuera.
 > ⚠ **No hay defensa en profundidad.** Si se saca o modifica `K-SELLERS-2` buscando volumen, entran
 > 3,5M de merchants sin que nada más los frene. Vale tenerlo presente en las campañas extra, que
 > justamente existen para relajar killers.
+
+## Share of wallet (SOW)
+
+Es la métrica que gobierna la política de Riesgo Medio — su `POLITICA_ID` es literalmente `SOW_RM`.
+Mide qué porción del ingreso del cliente cubre Meli con la TC, antes y después del upsell:
+
+| Parámetro | Fórmula |
+|---|---|
+| `ATENDIMENTO_PRE_UPS` | `WANDA.ATTEND_PCT` — el SOW actual, dato de entrada |
+| `ATENDIMENTO_POST_UPSELL` | `GENERAL_LIMIT / MAX_DEUDA_INGRESO` — el SOW resultante |
+
+`MAX_DEUDA_INGRESO` es el ingreso asumido, así que un valor de 1 significa que la línea iguala el
+ingreso mensual.
+
+> ⚠ **El SOW resultante se calcula pero no filtra.** `ATENDIMENTO_POST_UPSELL` es el paso 49 de 51
+> y es `POLICY_MODIFY`, no `POLICY_EXCLUDE`. Y `K-TC-ATENDIMENTO` —el killer que sí excluiría por
+> `ATTEND_PCT >= 1`— **no está en ninguna de las campañas** (ni 6970, ni 6816, ni 6126); en Ago-26
+> sólo aparece en la política ACTIVACION.
+>
+> Resultado en la 6970: de los 62.659 impactados, **3.563 quedan con SOW entre 100% y 200% y 154
+> por encima del 200%** — 5,9% con límite superior a su ingreso asumido. Ya venían por encima de 1
+> antes del upsell, así que el aumento los empuja más arriba en vez de cruzarlos por primera vez.
+>
+> Puede ser válido si el ingreso asumido subestima al cliente real o si el apetito lo contempla,
+> pero conviene revisarlo: es el tipo de cosa que una campaña extra —hecha para ganar volumen
+> relajando killers— amplifica sin que nadie lo note.

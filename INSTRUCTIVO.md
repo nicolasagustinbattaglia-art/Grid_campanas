@@ -134,7 +134,8 @@ Repo local con el HTML, las queries y los datos: `/Users/nbattaglia/Documents/ta
 UPSELL INDIVIDUOS  |  UPSELL SELLERS      ← nav de producto
   ├─ Campañas               ← comparación mes a mes (todo este instructivo)
   ├─ Simulaciones           ← versiones de un experimento (ver flujo al final)
-  └─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
+  ├─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
+  └─ Killers                ← reglas duras y killers específicos por política
 ```
 
 Las sub-hojas **existen sólo dentro de Upsell Individuos**. Al pasar a Sellers la barra desaparece.
@@ -1514,6 +1515,91 @@ Reglas de matcheo, todas necesarias para que el diff no engañe:
 Para actualizarlo: cambiar el dict `POLICIES` de los dos scripts con los `policy_id` de cada
 campaña (salen de `MONTHS[mes].meta.policies`), correr `fetch_policies.py`, después
 `diff_policies.py`, y regenerar el `POL_DIFF` del HTML.
+
+---
+
+## ──────────────────────────────────────────
+## HOJA KILLERS
+## ──────────────────────────────────────────
+
+Separa los killers de una campaña en dos vistas, al estilo de la lámina de reglas duras:
+
+- **Reglas duras** — los que aplican a **todas** las políticas de esa campaña, con definición de
+  negocio y volumen total excluido.
+- **Killers específicos** — matriz de los restantes, con tick verde en las políticas donde aplica
+  cada uno, ordenados por cobertura descendente.
+
+Tiene filtros de **mes** y **campaña** (el de campaña se repuebla al cambiar el mes) y un filtro de
+texto común a las dos tablas.
+
+### Cómo regenerar los datos
+
+Los datos salen de los mismos JSON de campaña que usa el diff del historial (`data/camp*.json`),
+así que no hay que volver a pegarle a EOC si ya los bajaste. El dataset se arma agrupando por mes:
+
+```js
+const KILLERS_MATRIZ = {
+  "[MES]": [
+    { label, tipo,            // tipo: "principal" | "extra"
+      campaign_id, name,
+      politicas: [...],       // nombres de grupo de EOC, en el orden de la lámina
+      abbr: { "[grupo]": "[sigla de columna]" },
+      duras:       [{ n, vol }],
+      especificos: [{ n, en: ["politica", ...], vol }] }
+  ]
+};
+```
+
+Reglas de armado:
+
+- **Excluir los grupos de sellers** (`BAU PF LT`, `BAU PF SMB`, `PISOS PF *`, `OPF PF *`). Son otro
+  producto y tienen su propia hoja; si entran, ensucian el cálculo de reglas duras porque su set de
+  killers es distinto.
+- **Un killer es "duro" si está en todas las políticas de esa campaña**, no contra una lista fija.
+  Al agregarse una política nueva, un killer puede dejar de ser duro sin que nadie lo haya tocado.
+- **`vol` es la suma del volumen excluido en todas las políticas donde aplica.** No es comparable
+  entre killers de distinta cobertura: uno que está en 9 políticas suma nueve veces.
+
+> **⚠ Campañas de una sola política.** Las campañas extra corren sobre una política, así que todos
+> sus killers son "duros" por definición y la matriz de específicos queda vacía. El encabezado lo
+> avisa; no es falta de datos.
+
+### Qué mirar
+
+- **Killers en n−1 políticas**: están a un paso de ser regla dura. Vale chequear si la ausencia es
+  intencional. En Ago-26 hay cinco en 8 de 9.
+- **Evolución de las reglas duras**: 25 (Jun) → 26 (Jul) → 29 (Ago), con el universo de killers
+  distintos casi estable (72 → 73 → 78). No se agregan killers sueltos: se estandarizan los que ya
+  existían.
+- **Reglas con prefijo `R-`** (no `K-`): son reglas de selección, no de exclusión, y conviven en el
+  mismo funnel. En Ago-26 hay tres.
+
+---
+
+## Share of wallet (SOW)
+
+Es la métrica que gobierna la política de Riesgo Medio — su `POLITICA_ID` es literalmente `SOW_RM`.
+Mide qué porción del ingreso del cliente cubre Meli con la TC:
+
+| Parámetro | Fórmula | Qué es |
+|---|---|---|
+| `ATENDIMENTO_PRE_UPS` | `WANDA.ATTEND_PCT` | el SOW actual, dato de entrada |
+| `ATENDIMENTO_POST_UPSELL` | `GENERAL_LIMIT / MAX_DEUDA_INGRESO` | el SOW resultante tras el upsell |
+
+`MAX_DEUDA_INGRESO` es el ingreso asumido, así que 1 significa que la línea iguala el ingreso mensual.
+
+> **⚠ El SOW resultante se calcula pero no filtra.** `ATENDIMENTO_POST_UPSELL` es el paso 49 de 51 y
+> es `POLICY_MODIFY`, no `POLICY_EXCLUDE`. Y `K-TC-ATENDIMENTO` —el killer que excluiría por
+> `ATTEND_PCT >= 1`— **no está en las campañas principales de Jun, Jul ni Ago**; en Ago-26 aparece
+> sólo en la política ACTIVACION.
+>
+> Medido sobre la 6970: de 62.659 impactados, **3.563 quedan entre 100% y 200% de SOW y 154 por
+> encima del 200%** — 5,9% con límite superior a su ingreso asumido, y ya venían por encima de 1
+> antes del upsell.
+>
+> Puede ser válido si el ingreso asumido subestima al cliente real, pero conviene revisarlo: es el
+> tipo de cosa que una campaña extra —hecha para ganar volumen relajando killers— amplifica sin que
+> nadie lo note.
 
 ---
 
