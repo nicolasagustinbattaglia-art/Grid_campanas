@@ -897,8 +897,13 @@
       <div class="separator"></div>
       <span class="ctrl-label">Campaña</span>
       <select id="selKillCamp"></select>
+      <div class="separator"></div>
+      <span class="ctrl-label">Política</span>
+      <select id="selKillPol"></select>
     </div>
-    <div id="killersHeader" style="margin-bottom:16px"></div>
+    <div id="killersHeader" style="margin-bottom:10px"></div>
+    <div id="killersResumenPol" style="display:none;background:#1a1a1a;border-radius:6px;padding:10px 14px;
+         margin-bottom:16px;font-size:11px;color:#ccc"></div>
 
     <div style="margin-bottom:28px">
       <div class="section-label">Reglas duras <span style="font-size:10px;font-weight:400;color:var(--text3)">(killers presentes en todas las políticas)</span></div>
@@ -1472,16 +1477,32 @@ function initKillersFiltro() {
   mes.value = Object.keys(KILLERS_MATRIZ)[0];
   poblarKillCamp();
   mes.addEventListener('change', () => { poblarKillCamp(); renderKillers(); });
-  camp.addEventListener('change', renderKillers);
+  camp.addEventListener('change', () => { poblarKillPol(); renderKillers(); });
+  document.getElementById('selKillPol').addEventListener('change', renderKillers);
 }
 
-// Las campañas dependen del mes elegido, así que este selector se repuebla al cambiarlo
+// Las campañas dependen del mes elegido, y las políticas de la campaña:
+// los dos selectores de abajo se repueblan en cascada.
 function poblarKillCamp() {
   const mes = document.getElementById('selKillMes').value;
   const camp = document.getElementById('selKillCamp');
   camp.innerHTML = '';
   (KILLERS_MATRIZ[mes] || []).forEach((c, i) => camp.add(new Option(c.label, String(i))));
   camp.value = '0';
+  poblarKillPol();
+}
+
+function poblarKillPol() {
+  const mes = document.getElementById('selKillMes').value;
+  const idx = parseInt(document.getElementById('selKillCamp').value, 10) || 0;
+  const K = (KILLERS_MATRIZ[mes] || [])[idx];
+  const sel = document.getElementById('selKillPol');
+  const previo = sel.value;
+  sel.innerHTML = '';
+  sel.add(new Option('— Todas —', 'TODAS'));
+  (K ? K.politicas : []).forEach(p => sel.add(new Option(K.abbr[p] || p, p)));
+  // Si la política elegida existe también en la campaña nueva, se respeta la elección
+  sel.value = [...sel.options].some(o => o.value === previo) ? previo : 'TODAS';
 }
 
 function renderKillers() {
@@ -1490,6 +1511,8 @@ function renderKillers() {
   const K = (KILLERS_MATRIZ[mes] || [])[idx];
   if (!K) return;
   const filtro = (document.getElementById('killersFiltro').value || '').trim().toUpperCase();
+  const pol = document.getElementById('selKillPol').value || 'TODAS';
+  const porPol = pol !== 'TODAS';
 
   // Con una sola política la separación pierde sentido: todos los killers son "duros"
   // por definición, así que se avisa en vez de mostrar una matriz de una columna.
@@ -1508,6 +1531,7 @@ function renderKillers() {
     </div>`;
 
   // --- Reglas duras ---
+  // Las duras aplican a todas las políticas, así que filtrar por una no las excluye.
   const durasFil = K.duras.filter(k => !filtro || k.n.toUpperCase().includes(filtro));
   document.getElementById('killersDurasTable').innerHTML = `
     <thead><tr>
@@ -1525,10 +1549,15 @@ function renderKillers() {
     }).join('') || '<tr><td colspan="3" style="color:var(--text3)">Sin resultados.</td></tr>'}</tbody>`;
 
   // --- Matriz de específicos ---
-  const espFil = K.especificos.filter(k => !filtro || k.n.toUpperCase().includes(filtro));
+  // Al filtrar por política se recortan las filas a los killers que aplican a ella, pero
+  // se mantienen todas las columnas: interesa ver en qué otras políticas está cada uno.
+  const espFil = K.especificos
+    .filter(k => !filtro || k.n.toUpperCase().includes(filtro))
+    .filter(k => !porPol || k.en.includes(pol));
+  const resalte = 'background:rgba(255,229,0,0.10)';
   const head = `<tr>
     <th style="text-align:left;width:30%">Killer</th>
-    ${K.politicas.map(p => `<th style="font-size:9px;padding:8px 4px">${K.abbr[p] || p}</th>`).join('')}
+    ${K.politicas.map(p => `<th style="font-size:9px;padding:8px 4px;${p === pol ? resalte : ''}">${K.abbr[p] || p}</th>`).join('')}
     <th style="width:6%">Q</th>
   </tr>`;
   const tick = '<span style="color:#27ae60;font-size:14px;font-weight:700">✓</span>';
@@ -1539,11 +1568,24 @@ function renderKillers() {
         <b style="font-size:11px">${k.n}</b>
         ${d.neg ? `<div style="font-size:10px;color:var(--text3);line-height:1.4;margin-top:2px">${d.neg}</div>` : ''}
       </td>
-      ${K.politicas.map(p => `<td style="padding:6px 4px">${k.en.includes(p) ? tick : '<span style="color:#ddd">·</span>'}</td>`).join('')}
+      ${K.politicas.map(p => `<td style="padding:6px 4px;${p === pol ? resalte : ''}">${k.en.includes(p) ? tick : '<span style="color:#ddd">·</span>'}</td>`).join('')}
       <td style="font-size:10px;color:var(--text3)">${k.en.length}</td>
     </tr>`;
   }).join('') || `<tr><td colspan="${K.politicas.length + 2}" style="color:var(--text3)">Sin resultados.</td></tr>`;
   document.getElementById('killersMatrizTable').innerHTML = `<thead>${head}</thead><tbody>${body}</tbody>`;
+
+  // Con una política elegida, el total de killers que la afectan es lo que interesa saber
+  const resumen = document.getElementById('killersResumenPol');
+  if (porPol) {
+    const espPol = K.especificos.filter(k => k.en.includes(pol)).length;
+    resumen.style.display = '';
+    resumen.innerHTML = `<b style="color:var(--accent-yellow)">${K.abbr[pol] || pol}</b>
+      aplica <b style="color:#fff">${K.duras.length + espPol}</b> killers:
+      ${K.duras.length} reglas duras + ${espPol} específicos
+      <span style="color:var(--text3)">· de ${K.duras.length + K.especificos.length} distintos en la campaña</span>`;
+  } else {
+    resumen.style.display = 'none';
+  }
 }
 
 // ===== HISTORIAL DE CAMBIOS =====
