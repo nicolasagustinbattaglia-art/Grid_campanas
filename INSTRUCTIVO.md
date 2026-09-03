@@ -1387,8 +1387,114 @@ Después subir con `file_new_version: true` sobre el `doc_id` del dashboard.
   pero al interpretar los números no hay que confundir efecto cascada con cambio de lógica.
 - **Las simulaciones no tienen grupo control.** Verificar con `COUNTIF(CAMPAIGN_CONTROL_GROUP)`
   antes de asumir que la matriz necesita el filtro GI que sí usa Campañas.
-- **La apertura por versión asume un grupo por simulación.** Si comparás corridas multi-grupo hay
-  que extender esa tabla para abrir por grupo además de por versión.
+- **La apertura por versión asume un grupo por simulación** — para experimentos multi-grupo (9
+  políticas del condensador completo, no una sola política ADHOC) hay que usar la extensión
+  `por_politica` descrita abajo.
+
+### Extensión SIM: desglose por política (multi-grupo)
+
+Cuando la simulación no es de una sola política (ADHOC) sino del condensador completo con las 9
+políticas de Individuos (ej. campañas "Competencia Individuos + Sellers"), cada versión de
+`SIM_GRUPOS` lleva además:
+
+```js
+"[ID] — [etiqueta]": {
+  ...campos normales (campaign_id, name, exec_id, eoc_url, es_original)...
+  group_name: "Individuos (9 políticas)",
+  politicas: ["BAU","JOURNEY 1A","VIP MP","PISOS","OPF","RIESGO MED. SOW","REACTIVACION","ACTIVACION","ADECUACION DE RENTA"],
+  metrics: { ... },   // TOTAL agregado: usuarios=suma, lim_actual/lim_final/mult=promedio ponderado por usuarios (misma fórmula que `totals()` en renderConsolidado de Historial)
+  funnel:  { ... },   // TOTAL: sumas simples de las 9 políticas
+  killers: [],        // vacío a propósito — no existe una cascada de killers combinada con sentido entre 9 políticas distintas
+  por_politica: {
+    "BAU": { metrics: {...}, funnel: {...}, killers: [...], rating_matrix: {...} },
+    // ...las 9 políticas, mismo shape que una versión de Agosto (single-policy)
+  }
+}
+```
+
+**Detección automática, sin flag explícito:** `simPoliticas()` mira si la primera versión del
+grupo activo tiene `por_politica` — si lo tiene, muestra los selectores de política y la hoja
+"Apertura por política"; si no (Agosto ADHOC), todo se comporta exactamente igual que antes.
+`simData(key, pol)` devuelve la versión recortada a esa política (`Object.assign({}, s, s.por_politica[pol])`)
+o la versión plana si no hay política — así `renderSimFunnel`/`renderSimMatrix` no necesitan saber
+en qué modo están.
+
+**Secciones nuevas/afectadas:**
+
+| Sección | Cambio |
+|---|---|
+| Apertura por política (nueva) | Tabla con las 9 políticas + fila TOTAL, selectores propios `selAperturaPolA/B`. Solo visible con `por_politica`. |
+| Funnel de killers | Selector `selFunPol` (política) sumado a los de versión — recorta con `simData`. |
+| Matriz de ratings | Selector `selMatPol` (política) sumado a los de versión — recorta con `simData`. |
+| Resumen del funnel | Se **oculta** (`simResumenWrap`) en modo multi-política — no tiene sentido agregar `killers.length`/`accumulated` de 9 cascadas distintas. |
+| Métricas generales / Apertura por versión | Sin cambios de código — ya funcionan solas al recibir el `metrics`/`funnel` TOTAL agregado. |
+
+**⚠ Trampa de datos — `EOC_CAMPAIGN_EXECUTION_DETAIL.ACTIONABLE_COLUMNS.POLITICA_ID` no siempre
+coincide con `processing_funnel.users_to_impact` / `campaign_dashboard.audience_by_group` que
+devuelve `get_campaign_execution_dashboard`.** Verificado en 3 campañas reales (7165, y también
+6816 — la campaña de **producción** de agosto, no solo simulaciones): 2 de las 9 políticas
+(ACTIVACION, VIP MP) siempre calzan exacto; las otras 7 (BAU, JOURNEY, OPF, PISOS, ADECUACION,
+REACTIVACION, RIESGO MED. SOW) quedan por debajo en la tabla BQ, entre 6% y 22%. La diferencia se
+va a las filas con `POLITICA_ID` en `NULL`/`BAU_PF_LT`/`BAU_PF_SMB`/`PISOS SELLERS` — son clientes
+duales (elegibles por Individuos y por su variante Sellers) que el export a BigQuery termina
+etiquetando con el policy_id de Sellers en vez del de Individuos.
+
+**Cuál número es el correcto:** el de la tabla BQ (`POLITICA_ID`), no el del funnel de la API.
+Confirmado contra la pantalla de EOC "Detalle por grupo de procesamiento — Cantidad de usuarios
+**accionados**", que reproduce exacto los números de BQ. No usar `processing_funnel.users_to_impact`
+como fuente de verdad para el desglose por política en campañas con Individuos + Sellers mezclados.
+
+**⚠ No usar `CAMP_EOC_POLICY` para traer el límite actual.** Es la tabla que devuelve
+`get_campaign_execution_dashboard` en su query de ejemplo ("New query Policy"), con
+`WANDA__CURRENT_LIMIT_CCARD` en `COLUMNS_VARIABLES_POLICY`. Dos problemas:
+1. Cuesta ~**320GB** por ejecución **sin importar el filtro** — `COLUMNS_VARIABLES_POLICY` y
+   `PARAMETERS` son columnas REPEATED grandes en una tabla compartida por *todas* las campañas de
+   EOC; BigQuery cobra por escanear esas columnas completas, no por las filas que el `WHERE` deja.
+2. En la práctica devolvió `NULL` para el 100% de las filas al extraerlo (bug o gap no
+   diagnosticado — no vale la pena insistir, el costo de depurarlo es el mismo ~320GB otra vez).
+
+**Fuente correcta y barata para el límite actual — `LIMITE_PRE_UPSELL` + fallback `BT_VU_CREDIT`:**
+
+```sql
+WITH acc AS (
+  SELECT
+    CAST(CUS_CUST_ID AS STRING) AS cid,
+    CAST((SELECT elem.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) elem WHERE elem.NAME='POLITICA_ID' LIMIT 1) AS STRING) AS politica,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='general_limit' LIMIT 1) AS FLOAT64) AS lim_final,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='LIMITE_PRE_UPSELL' LIMIT 1) AS FLOAT64) AS lim_pre,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_BEHAVIOR_TC' LIMIT 1) AS STRING) AS bhv,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_UPSELL_TC' LIMIT 1) AS STRING) AS ups
+  FROM `bq-cp-prd-o0b0uuv7cs2-furyid.campaign_schema.EOC_CAMPAIGN_EXECUTION_DETAIL`
+  WHERE EXECUTION_ID = '[EXEC_ID]'
+),
+credit AS (
+  SELECT CAST(cus_cust_id AS STRING) AS cid, CREDIT_AMT
+  FROM `meli-bi-data.WHOWNER.BT_VU_CREDIT`
+  WHERE sit_site_id = 'MLB' AND CRD_PROD_DEF_TYPE_SK = 3 AND VALID_TO_DT = '2099-12-31'
+),
+joined AS (
+  SELECT a.politica, a.bhv, a.ups, a.lim_final,
+    COALESCE(a.lim_pre, c.CREDIT_AMT) AS lim_actual   -- LIMITE_PRE_UPSELL cubre BAU/JOURNEY/VIP_MP/REACTIVACION/ACTIVACION/SOW_RM/ADECUACION al 100%; PISOS y OPF SIEMPRE lo traen NULL, ahí cae al fallback de BT_VU_CREDIT
+  FROM acc a LEFT JOIN credit c ON a.cid = c.cid
+  WHERE a.politica IN ('BAU','PISOS','OPF','VIP_MP','SOW_RM','REACTIVACION','ACTIVACION','JOURNEY','ADECUACION')
+)
+-- de acá GROUP BY politica para métricas, y GROUP BY politica,bhv,ups (WHERE bhv/ups NOT NULL) para la matriz de ratings
+```
+
+Costo real: ~60-75GB por ejecución (dominado por el scan de `BT_VU_CREDIT`, no de
+`EOC_CAMPAIGN_EXECUTION_DETAIL`). Con 4 campañas eso es ~250-300GB en vez de los ~1,3TB que hubiera
+costado combinar métricas+matriz con `CAMP_EOC_POLICY` en las 4.
+
+**Mapeo de códigos cortos de política (BQ) → nombre de display (EOC/dashboard):**
+`BAU`→BAU · `JOURNEY`→JOURNEY 1A · `VIP_MP`→VIP MP · `PISOS`→PISOS · `OPF`→OPF ·
+`SOW_RM`→RIESGO MED. SOW · `REACTIVACION`→REACTIVACION · `ACTIVACION`→ACTIVACION ·
+`ADECUACION`→ADECUACION DE RENTA.
+
+**Reconciliar el funnel/killers con el `usuarios` validado de BQ:** el `excluded_by_policy` que
+devuelve la API queda desactualizado una vez que se reemplaza `users_to_impact` por el número de
+BQ. Recalcular: `excluded_by_policy_nuevo = ultimo_killer.accumulated − usuarios_bq`. El resto de
+la cascada de killers (todo lo previo a la política) no se toca — el problema de etiquetado nace
+después de la etapa de rules/killers, no la afecta.
 
 ### CHECKLIST — SIMULACIONES
 
@@ -1400,6 +1506,19 @@ Después subir con `file_new_version: true` sobre el `doc_id` del dashboard.
 - [ ] Validación jsdom OK — ambas sub-hojas renderizan, 0 errores de JS
 - [ ] Hoja Campañas verificada sin regresiones
 - [ ] Subido al Grid con `file_new_version: true`
+
+### CHECKLIST — SIMULACIONES multi-política (condensador completo, no ADHOC)
+
+- [ ] `usuarios` por política validado contra `POLITICA_ID` de `EOC_CAMPAIGN_EXECUTION_DETAIL`,
+      **no** contra `processing_funnel.users_to_impact` de la API (ver trampa de datos arriba)
+- [ ] `lim_actual` sacado de `LIMITE_PRE_UPSELL` con fallback a `BT_VU_CREDIT.CREDIT_AMT` para
+      PISOS/OPF — **nunca** de `CAMP_EOC_POLICY` (320GB y devuelve NULL)
+- [ ] `excluded_by_policy` recalculado como `ultimo_killer.accumulated − usuarios_bq` por política
+- [ ] `metrics`/`funnel` del nivel TOTAL de la versión = agregado de las 9 políticas (usuarios
+      suma, lim_actual/lim_final/mult promedio ponderado), `killers: []`
+- [ ] `politicas` y `por_politica` agregados a cada versión, mismo shape que una versión simple
+- [ ] jsdom: probar el grupo multi-política Y el grupo de una sola política (agosto ADHOC) — que
+      ninguno de los dos se rompa con los cambios en `renderSimFunnel`/`renderSimMatrix`
 
 ---
 
