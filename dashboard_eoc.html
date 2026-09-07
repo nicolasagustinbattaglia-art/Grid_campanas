@@ -1170,6 +1170,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1-v4",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC × antigüedad TC full (3 buckets: &lt;360d / 360-720d / ≥720d)",
     n_exceptions: 40,
+    resumen_humano: 'Le sube el límite a clientes que califican según su rating y comportamiento con la tarjeta, ajustado a lo que declaran ganar. Antes de ofertar nada chequea tres cosas: que el cliente no esté ya en el techo de límite permitido para su renta, que su renta haya mostrado señales de crecimiento en el último mes, y que no esté ya gastando más de lo que su ingreso admite. Si pasa esos filtros, calcula el nuevo límite a partir de la renta declarada y de cuánto puede pagar por mes, lo redondea, y por último chequea que el aumento valga la pena (que no sea insignificante) y que la fuente de esa renta sea confiable — un dato verificado, no una estimación.',
     pasos: [
       {t:'calc', d:'Calibra topes por NISE×rating×antigüedad: sube CAP (Bronze +0 → Platinum +10-12k según BHV A/B o C-F) y fija LIM_RENTA_TOPE (múltiplo de renta admitido, 1.5x-4x).'},
       {t:'kill', d:'EXCLUSION_LIM_RENTA — excluye si límite_actual/renta &gt; LIM_RENTA_TOPE (ya estás sobre-endeudado para tu tier).'},
@@ -1186,6 +1187,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-REACTIVACION-BAU-PS-1-V4",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC (9 combinaciones, sin bucket de antigüedad en la matriz base)",
     n_exceptions: 40,
+    resumen_humano: 'Apunta a clientes con la tarjeta relativamente inactiva: solo entran quienes no la usaron en los últimos 90 días, pero tampoco hace tanto que no la usan (menos de 270 días) — busca reenganchar a alguien que se alejó, no a alguien que ya la abandonó del todo. A los que califican por rating y comportamiento, les ofrece un aumento fijo (75% más del límite actual), ajustado según cuánta deuda ya tienen tomada en otros productos y qué tan "atendido" está el cliente en términos de crédito, siempre que no estén ya al límite de lo que su renta permite.',
     pasos: [
       {t:'calc', d:'Calibra por rating: fija RCI_CONJ_TEORICA (0.275-0.3), NIVEL_USO_TC_TEORICO (0.04-0.1), PAGO_MIN_TC_TEORICO (0.6-0.8) y CAP (15.000-20.000) según la matriz upsell×behavior.'},
       {t:'calc', d:'Sube el CAP nominal según NISE y, para Gold/Platinum, según el rating de comportamiento (+5.000 a +12.000).'},
@@ -1206,6 +1208,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202609-MLB-IND-TC FULL-UPSELL-BAU-BAU-OPF-EXPANSIVO (estado DRAFT)",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC (9 combinaciones, sin antigüedad en la matriz base)",
     n_exceptions: 37,
+    resumen_humano: 'Pensada para clientes que comparten sus datos financieros con Open Finance (el sistema que permite a otras entidades ver cuánto crédito ya tiene una persona). En vez de basarse en lo que el cliente declara ganar, usa directamente el límite máximo que Open Finance certifica que podría tener, y le ofrece un porcentaje de eso. No aplica a clientes Platinum muy nuevos, ni a quienes ya tienen un límite mayor al que certifica Open Finance (no tendría sentido subírselo). Todavía está en borrador, no activa en producción.',
     pasos: [
       {t:'calc', d:'Calibra por rating: MULTIP_NOM_UPS_OPF (0.8-1), NIVEL_USO_TC_TEORICO (0.04-0.1), PAGO_MIN_TC_TEORICO (0.6-0.8) y CAP (15.000-20.000).'},
       {t:'calc', d:'Pisa PAGO_MIN_TC_UPS / NIVEL_USO_TC_UPS reales por teóricos.'},
@@ -1230,6 +1233,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-JOURNEY-UPSELL-BAU-FLEXIBILIZACIONREGLAS-1ERAÑO-1",
     segmentacion: "INTERNAL_RATING_BEHAVIOR_TC (sin rating de upsell) × NISE (solo Bronze/Silver) × rango de CURRENT_LIMIT_CCARD (buckets ~$100-500)",
     n_exceptions: 19,
+    resumen_humano: 'Es para clientes en su primer año con la tarjeta ampliada ("full"), pensada para acompañarlos mientras se conocen mutuamente. A diferencia de las demás políticas, acá el nuevo límite no se calcula con una fórmula: es un valor fijo ya definido de antemano según su comportamiento, su nivel socioeconómico (solo aplica a los niveles más bajos, Bronce y Plata) y el límite que ya tienen. Si el cliente tiene mal rating de riesgo, o si su límite actual ya es "grande" para su categoría (indicio de que ya se graduó de este programa de bienvenida), sale de esta política y pasa a la política general (BAU).',
     pasos: [
       {t:'calc', d:'Anula el CAP si NISE es null (sin dato de renta asumida).'},
       {t:'calc', d:'Pisa PAGO_MIN_TC_UPS / NIVEL_USO_TC_UPS reales por teóricos.'},
@@ -1251,6 +1255,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-PISOS-MINIMOS-BAU-PS-2",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC (16 combos, sin bucket de antigüedad en la matriz de atributos)",
     n_exceptions: 20,
+    resumen_humano: 'Busca asegurar un límite mínimo razonable en relación a la renta del cliente — un "piso". Ese piso exigido crece cuanto más antigüedad tiene el cliente con la tarjeta. Si el límite actual ya está por encima de ese piso, no hace falta subírselo por esta vía y el cliente queda afuera. Si está por debajo, calcula cuánto subirle en base a ese piso (y no, como en otras políticas, en base a un ratio de endeudamiento), siempre topeado a lo que su capacidad de pago permite.',
     pasos: [
       {t:'calc', d:'Arma OBJ_PISO_MINIMO_EXP sumando un bonus progresivo al OBJETIVO_PISO_MINIMO (0.20-0.25) según antigüedad TC full: 120-360d (+0) hasta 901d+ (+0.20).'},
       {t:'calc', d:'Enciende KILLER_PISOS_MINIMOS=true si el límite actual, como % de la renta, ya iguala o supera el piso objetivo.'},
@@ -1271,6 +1276,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-ACTIVACION-BAU-PS-1-v4",
     segmentacion: "INTERNAL_RATING_CHARACTER_TC × BA_RATING_EXTERNO_MLB (16 combos: A1/A2/B1/B2 × A/B/C/D) — no usa los tags de upsell/behavior del resto",
     n_exceptions: 32,
+    resumen_humano: 'Apunta a cuentas jóvenes (entre 60 días y un año de antigüedad) que además muestren buen uso de Mercado Libre como marketplace (compradores frecuentes o habituales, no ocasionales). A diferencia del resto, no mira el rating de comportamiento con la tarjeta sino un rating de "carácter" del cliente y un rating externo. Ofrece un aumento fijo (75% más), pero lo ajusta según cuánta deuda ya tiene tomada el cliente en relación a su renta — cuanto más "cargado" está, menos le sube.',
     pasos: [
       {t:'kill', d:'EXCLUSION_ANTIGUEDAD — excluye si la antigüedad TC full es &lt;60 o &gt;360 días (ventana de elegibilidad de "activación": cuentas jóvenes). Killer exclusivo de Activación.'},
       {t:'kill', d:'EXCLUSION_ENGAGEMENT_MP — excluye si el tag de ciclo de vida en Marketplace no está en (POWER USER, CORE, CASUAL). Killer exclusivo de Activación.'},
@@ -1291,6 +1297,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-BAU-BAU-PS-v4",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC × antigüedad TC full (3 buckets) — misma segmentación que ADECUACION (24 combinaciones activas)",
     n_exceptions: 51,
+    resumen_humano: 'Es la política general/por defecto, y la más completa: combina el límite de la tarjeta con el de otro producto de consumo que el cliente pueda tener, para no sobre-endeudarlo entre los dos. Si detecta que el cliente ya renegoció alguna deuda antes, es más conservadora con el aumento. Calcula tres posibles nuevos límites por caminos distintos (un múltiplo simple del límite actual, un aumento nominal ajustado por historial, y uno basado en cuánto puede pagar) y se queda con el más chico de los tres, para no pasarse.',
     pasos: [
       {t:'calc', d:'Inicializa LIMITE_CONSUMO = WANDA.MONTO_PROP_OLD (monto de una propuesta previa de otro producto de consumo); si queda null, lo resetea a 0. Concepto exclusivo de BAU.'},
       {t:'calc', d:'Fija TOPE_CONJUNTO = un parámetro externo de RCI conjunto (WANDA.PARAM_RCI_CONJUNTA_VAL) — no se calcula localmente como en ADECUACION.'},
@@ -1320,6 +1327,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC-FULL-UPSELL-BAU-RIESGO-MEDIO-PS-3-v4",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC × antigüedad TC full (3 buckets) — misma segmentación que ADECUACION. POLITICA_ID final = SOW_RM",
     n_exceptions: 51,
+    resumen_humano: 'Aplica la misma lógica que BAU (combina el límite de tarjeta con el de otro producto, y toma el más chico entre tres cálculos posibles), pero apuntada a un segmento de riesgo medio. Además calcula qué porción del ingreso del cliente ya está comprometida en pagos (su "share of wallet"), aunque esa métrica hoy solo se reporta — no se usa todavía para decidir quién queda afuera.',
     pasos: [
       {t:'calc', d:'Inicializa LIMITE_CONSUMO (igual que BAU).'},
       {t:'calc', d:'TOPE_CONJUNTO = parámetro externo de RCI conjunto.'},
@@ -1341,6 +1349,7 @@ const POLICY_SUMMARIES = {
     policy_name: "202608-MLB-IND-TC FULL-UPSELL-BAU-VIP-MP-BAU-4-v4",
     segmentacion: "INTERNAL_RATING_UPSELL_TC × INTERNAL_RATING_BEHAVIOR_TC × antigüedad TC full (3 buckets) — misma segmentación que RIESGO MED. SOW. POLITICA_ID final = VIP_MP",
     n_exceptions: 51,
+    resumen_humano: 'Usa exactamente el mismo motor que Riesgo Medio (mismos cálculos, mismo orden), pero para un segmento premium: clientes con buen comportamiento en Marketplace. La única diferencia real es que es más generosa: permite topes de límite y de renta más altos, especialmente para los niveles socioeconómicos más altos (Oro y Platino).',
     pasos: [
       {t:'calc', d:'Mismo motor exacto que RIESGO MED. SOW (51 excepciones, mismo orden): límite conjunto, RCI, killer de entrada por RCI vs. tope, 3 candidatos de límite en paralelo, EXCLUSION_LIM_RENTA, KILLER_UPSELL_INSUFFICIENT, cierre con SOW calculado sin filtrar.'},
       {t:'calc', d:'CAP por NISE: Silver +5.000 (igual), Gold +12.000 (vs. +10.000 en Riesgo Medio), Platinum +30.000 (vs. +15.000) — tope de límite bastante más alto para Gold/Platinum.'},
@@ -1379,12 +1388,21 @@ function renderResumenPolitica() {
   }).join('');
 
   body.innerHTML = `
-    <div style="background:#1a1a1a;border-radius:8px;padding:16px 20px;margin-bottom:4px;color:#eee">
+    <div style="background:#1a1a1a;border-radius:8px;padding:18px 20px;margin-bottom:16px;color:#eee">
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${key} <span style="font-size:11px;font-weight:400;color:var(--text3)">policy_id ${pol.policy_id}</span></div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${pol.policy_name}</div>
-      <div style="font-size:11px;color:#ccc;margin-bottom:14px"><b style="color:var(--text2)">Segmentación:</b> ${pol.segmentacion} · <b style="color:var(--text2)">${pol.n_exceptions}</b> excepciones evaluadas en secuencia</div>
-      ${pasosHtml}
+      <div style="font-size:11px;color:var(--text3);margin-bottom:14px">${pol.policy_name}</div>
+      <div style="font-size:13.5px;color:#f0f0f0;line-height:1.65">${pol.resumen_humano}</div>
     </div>
+    <details style="background:#1a1a1a;border-radius:8px;padding:2px 20px">
+      <summary style="cursor:pointer;padding:14px 0;font-size:11px;font-weight:700;text-transform:uppercase;
+               letter-spacing:0.08em;color:var(--text3)">Detalle técnico
+        <span style="font-weight:400;text-transform:none;letter-spacing:normal">— segmentación, variables y fórmulas exactas</span>
+      </summary>
+      <div style="padding-bottom:16px">
+        <div style="font-size:11px;color:#ccc;margin-bottom:14px"><b style="color:var(--text2)">Segmentación:</b> ${pol.segmentacion} · <b style="color:var(--text2)">${pol.n_exceptions}</b> excepciones evaluadas en secuencia</div>
+        ${pasosHtml}
+      </div>
+    </details>
   `;
 }
 
