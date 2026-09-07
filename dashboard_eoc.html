@@ -1164,7 +1164,6 @@ const POLICIES = Object.keys(POLICY_MAP);
 
 // Mecánica de cada política, confirmada línea por línea vía EOC get_policy_detail (sep-2026).
 // "t":"calc" = ajusta/calcula un parámetro. "t":"kill" = excluye al cliente (POLICY_EXCLUDE).
-// ADECUACION DE RENTA es la política de referencia contra la que se listan "diferencias" en el resto.
 const POLICY_SUMMARIES = {
   "ADECUACION": {
     policy_id: 2720,
@@ -1181,7 +1180,6 @@ const POLICY_SUMMARIES = {
       {t:'calc', d:'Calcula métricas finales: multiplicador final, MAX_DEUDA_INGRESO, ATENDIMENTO_POST_UPSELL (SOW), RCI_TC.'},
       {t:'kill', d:'R - RENTA REAL — excluye si ASSUMED_INCOME_SOURCE_TAG no pertenece a (OPF, BELVO, PORTABILITY, OPEN_FINANCE, CONSIGNED) — no acepta estimadores, solo fuente verificada.'},
     ],
-    diferencias: null,
   },
   "REACTIVACION": {
     policy_id: 2712,
@@ -1201,11 +1199,6 @@ const POLICY_SUMMARIES = {
       {t:'calc', d:'Arma GENERAL_LIMIT = CURRENT_LIMIT_CCARD × 1.75 (multiplicador fijo, no renta×RCI) — topeado luego por atendimento, CAP y LIM_RENTA_TOPE×renta. Redondeo a 100.'},
       {t:'kill', d:'KILLER_UPSELL_INSUFFICIENT — excluye si el aumento no supera PORC_MIN_UPS (1.1x) y MONTO_MIN_UPS ($100) simultáneamente.'},
       {t:'calc', d:'Calcula métricas finales: multiplicador final, ATENDIMENTO_POST_UPS, RCI conjunta actual y post-upsell (con/sin optin).'},
-    ],
-    diferencias: [
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL.',
-      'Suma un killer propio de recencia de consumo (90-270 días) — el corazón de la lógica de reactivación.',
-      'El límite general parte de un multiplicador fijo sobre el límite actual (1.75x), no de renta×RCI.',
     ],
   },
   "OPF": {
@@ -1231,12 +1224,6 @@ const POLICY_SUMMARIES = {
       {t:'kill', d:'Excluye directamente si GENERAL_LIMIT ≥ CAP (en vez de solo topear, como en ADECUACION). Killer exclusivo de OPF.'},
       {t:'calc', d:'Calcula ATENDIMENTO_POST_UPSELL final.'},
     ],
-    diferencias: [
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL.',
-      'GENERAL_LIMIT nace del límite máximo certificado por Open Finance, no de renta×RCI.',
-      'El exceso de CAP excluye directamente al cliente en vez de solo recortar el límite.',
-      'Política en estado DRAFT — todavía no activa en producción.',
-    ],
   },
   "JOURNEY 1A": {
     policy_id: 2678,
@@ -1258,12 +1245,6 @@ const POLICY_SUMMARIES = {
       {t:'kill', d:'Limite Pre Upsell Bronze/Silver — excluye Bronze con límite actual ≥1.400 y Silver con límite actual ≥2.200 (ya "gradúan" del journey, pasan a BAU regular). Killer exclusivo de Journey.'},
       {t:'kill', d:'EXCLUSION GOLD+ — excluye NISE Gold o Platinum (coherente con que la matriz de settings solo cubre Bronze/Silver).'},
     ],
-    diferencias: [
-      'La política más distinta de todas: no arma el límite desde renta ni desde RCI, usa una tabla de valores fijos por segmento.',
-      'No tiene LIM_RENTA_TOPE / EXCLUSION_LIM_RENTA, ni KILLER_SIN_INCREMENTO_INGRESO, ni R - RENTA REAL.',
-      'Redondeo a base 50 en vez de 100.',
-      'Introduce killers propios de "graduación" (rating de riesgo alto, límites que ya superaron el piso de journey) que sacan al cliente de esta política.',
-    ],
   },
   "PISOS": {
     policy_id: 2679,
@@ -1284,12 +1265,6 @@ const POLICY_SUMMARIES = {
       {t:'kill', d:'KILLER_UPSELL_INSUFFICIENT — excluye si el aumento no supera un mínimo simultáneo en % y en $.'},
       {t:'calc', d:'Calcula métricas finales: multiplicador final, MAX_DEUDA_INGRESO, ATENDIMENTO_POST_UPSELL, RCI conjunta (con/sin optin).'},
     ],
-    diferencias: [
-      'No segmenta por antigüedad en la matriz base (solo dentro de una excepción puntual).',
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL.',
-      'El límite general parte del piso de límite/renta, no del RCI.',
-      'Agrega un killer propio (Exclusión_Pisos_Minimos) para quienes ya cumplen ese piso.',
-    ],
   },
   "ACTIVACION": {
     policy_id: 2719,
@@ -1309,13 +1284,6 @@ const POLICY_SUMMARIES = {
       {t:'calc', d:'Arma GENERAL_LIMIT = CURRENT_LIMIT × 1.75 (multiplicador fijo), topeado por LIMITE_POLITICA_OBJ_ATENDIMENTO, luego por el máximo RCI, luego por CAP, luego por LIM_RENTA_TOPE×renta. Redondeo a 100.'},
       {t:'kill', d:'KILLER_UPSELL_INSUFFICIENT — patrón estándar.'},
       {t:'calc', d:'Calcula multiplicador final, ATENDIMENTO_POST_UPSELL, RCI conjunta actual y post-upsell proyectado (con/sin optin) — a diferencia del resto, calcula explícitamente el RCI post-upsell.'},
-    ],
-    diferencias: [
-      'Segmenta por rating de carácter/externo en vez de upsell/behavior — única política con esta segmentación.',
-      'Agrega dos gates de elegibilidad exclusivos: ventana de antigüedad 60-360d y engagement en Marketplace.',
-      'El límite base es un multiplicador fijo (1.75x) del límite actual, no renta×RCI.',
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL.',
-      'Introduce el tope escalonado por nivel de atendimento (60%/100% de MAX_DEUDA_INGRESO).',
     ],
   },
   "BAU": {
@@ -1346,13 +1314,6 @@ const POLICY_SUMMARIES = {
       {t:'kill', d:'KILLER_UPSELL_INSUFFICIENT — patrón estándar.'},
       {t:'calc', d:'Calcula métricas finales de cierre (multiplicador final, MAX_DEUDA_INGRESO, ATENDIMENTO_POST_UPSELL, RCI conjunta con/sin optin).'},
     ],
-    diferencias: [
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL.',
-      'Introduce el concepto de límite conjunto con otro producto de consumo (LIMITE_CONSUMO/LIMITE_TOTAL).',
-      'Introduce FLAG_REPEAT (cliente renegociado) que reduce el aumento nominal.',
-      'En vez de un único GENERAL_LIMIT por capping secuencial, calcula 3 candidatos en paralelo y toma el mínimo.',
-      'El tope de RCI conjunto viene de un parámetro externo — RCI_CONJ_TEORICA queda parametrizada por segmento pero sin uso real (vestigial).',
-    ],
   },
   "RIESGO MEDIO": {
     policy_id: 2723,
@@ -1374,12 +1335,6 @@ const POLICY_SUMMARIES = {
       {t:'kill', d:'KILLER_UPSELL_INSUFFICIENT — patrón estándar (110% y $100).'},
       {t:'calc', d:'Métricas finales: MULTIPLICADOR_UPSELL_FINAL, MAX_DEUDA_INGRESO, ATENDIMENTO_PRE_UPS (=WANDA.ATTEND_PCT fijo desde settings, nunca se recalcula), ATENDIMENTO_POST_UPSELL (=GENERAL_LIMIT/MAX_DEUDA_INGRESO), RCI conjunta final.'},
     ],
-    diferencias: [
-      'No tiene KILLER_SIN_INCREMENTO_INGRESO ni R - RENTA REAL — cualquier fuente de ingreso asumido es válida.',
-      'GENERAL_LIMIT no parte de renta×RCI teórico sino del mínimo entre 3 candidatos centrados en RCI conjunto (mismo motor que BAU).',
-      'Calcula Share of Wallet (ATENDIMENTO_PRE_UPS / POST_UPSELL) pero CONFIRMADO que ningún killer lo usa para excluir — queda solo como parámetro de salida/reporting.',
-      'Agrega un killer de entrada por RCI conjunto vs. tope que ADECUACION no tiene de esa forma.',
-    ],
   },
   "VIP MP": {
     policy_id: 2722,
@@ -1391,10 +1346,6 @@ const POLICY_SUMMARIES = {
       {t:'calc', d:'CAP por NISE: Silver +5.000 (igual), Gold +12.000 (vs. +10.000 en Riesgo Medio), Platinum +30.000 (vs. +15.000) — tope de límite bastante más alto para Gold/Platinum.'},
       {t:'calc', d:'LIM_RENTA_TOPE por NISE×antigüedad: Bronze/Silver/Gold 2/4/5 (vs. 2/3/4), Platinum 2/2.5/3 (vs. 1.5/2/2.5) — múltiplos de renta admitidos mayores en casi todos los segmentos.'},
       {t:'calc', d:'Cubre menos combinaciones de segmento en settings (18 vs. 24 en Riesgo Medio) — refleja que el universo VIP MP es más chico, no un cambio de lógica.'},
-    ],
-    diferencias: [
-      'Mismas diferencias que RIESGO MED. SOW respecto a ADECUACION (sin killer de ingreso/renta real, motor de 3 candidatos, SOW que no filtra).',
-      'Frente a RIESGO MED. SOW específicamente: la única diferencia real es de calibración (CAP y LIM_RENTA_TOPE más generosos) — la lógica es idéntica.',
     ],
   },
 };
@@ -1423,25 +1374,17 @@ function renderResumenPolitica() {
       <span style="flex:0 0 62px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
             padding:3px 6px;border-radius:3px;height:fit-content;white-space:nowrap;text-align:center;
             background:${badgeColor}1a;color:${badgeColor};border:1px solid ${badgeColor}55">${esKill ? 'Excluye' : 'Calcula'}</span>
-      <span>${p.d}</span>
+      <span style="color:#ddd">${p.d}</span>
     </div>`;
   }).join('');
 
-  const diffHtml = pol.diferencias
-    ? `<div style="background:#1a1a1a;border-radius:6px;padding:12px 14px;margin-top:18px;font-size:11px;color:#ccc;line-height:1.7">
-         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:6px">Diferencias vs. ADECUACION DE RENTA (referencia)</div>
-         ${pol.diferencias.map(d => `<div style="padding:2px 0">• ${d}</div>`).join('')}
-       </div>`
-    : `<div style="background:#1a1a1a;border-radius:6px;padding:10px 14px;margin-top:18px;font-size:11px;color:var(--accent-yellow)">Política de referencia — el resto de las políticas se compara contra ésta.</div>`;
-
   body.innerHTML = `
-    <div style="background:#1a1a1a;border-radius:8px;padding:16px 20px;margin-bottom:4px">
+    <div style="background:#1a1a1a;border-radius:8px;padding:16px 20px;margin-bottom:4px;color:#eee">
       <div style="font-size:15px;font-weight:700;margin-bottom:4px">${key} <span style="font-size:11px;font-weight:400;color:var(--text3)">policy_id ${pol.policy_id}</span></div>
       <div style="font-size:11px;color:var(--text3);margin-bottom:12px">${pol.policy_name}</div>
       <div style="font-size:11px;color:#ccc;margin-bottom:14px"><b style="color:var(--text2)">Segmentación:</b> ${pol.segmentacion} · <b style="color:var(--text2)">${pol.n_exceptions}</b> excepciones evaluadas en secuencia</div>
       ${pasosHtml}
     </div>
-    ${diffHtml}
   `;
 }
 
