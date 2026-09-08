@@ -1,65 +1,63 @@
 import sys
 
-def pol_union(exec_id, n=9):
-    parts = []
-    for i in range(1, n+1):
-        parts.append(f"SELECT '{exec_id}-{i}' AS GRP, CAST(CUS_CUST_ID AS STRING) AS cid, SAFE_CAST(WANDA__CURRENT_LIMIT_CCARD AS FLOAT64) AS cur FROM `meli-bi-data.SBOX_CREDITSSIGMA.CAMP_EOC_RK_POLICY_{exec_id}-{i}`")
-    return "\n  UNION ALL ".join(parts)
+POLITICAS = ('BAU','PISOS','OPF','VIP_MP','SOW_RM','REACTIVACION','ACTIVACION','JOURNEY','ADECUACION')
 
-def metrics_sql(exec_id):
+def combined_sql(exec_id):
+    """Métricas + matriz de ratings en una sola query, para el flujo multi-política
+    (Individuos + Sellers). No usa SBOX_CREDITSSIGMA.CAMP_EOC_RK_POLICY_* — esa tabla
+    quedó de un flujo viejo y dejó de poblarse (confirmado vía INFORMATION_SCHEMA:
+    ninguna tabla de ese patrón se creó después del 2026-08-31, y ningún job de
+    BigQuery la consultó jamás para las simulaciones de septiembre).
+
+    La fuente real: ACTIONABLE_COLUMNS de EOC_CAMPAIGN_EXECUTION_DETAIL ya trae
+    LIMITE_PRE_UPSELL (límite actual) sin necesidad de joins — cubre BAU, JOURNEY,
+    VIP_MP, REACTIVACION, ACTIVACION, SOW_RM y ADECUACION al 100%. Para PISOS y OPF
+    ese campo viene null, así que cae a BT_VU_CREDIT como fallback."""
     return f"""WITH acc AS (
   SELECT
     CAST(CUS_CUST_ID AS STRING) AS cid,
-    EXECUTION_GROUP_ID,
-    CAST((SELECT elem.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) elem WHERE elem.NAME = 'POLITICA_ID' LIMIT 1) AS STRING) AS politica,
-    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME = 'general_limit' LIMIT 1) AS FLOAT64) AS general_limit
+    CAST((SELECT elem.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) elem WHERE elem.NAME='POLITICA_ID' LIMIT 1) AS STRING) AS politica,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='general_limit' LIMIT 1) AS FLOAT64) AS lim_final,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='LIMITE_PRE_UPSELL' LIMIT 1) AS FLOAT64) AS lim_pre,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_BEHAVIOR_TC' LIMIT 1) AS STRING) AS bhv,
+    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_UPSELL_TC' LIMIT 1) AS STRING) AS ups
   FROM `bq-cp-prd-o0b0uuv7cs2-furyid.campaign_schema.EOC_CAMPAIGN_EXECUTION_DETAIL`
   WHERE EXECUTION_ID = '{exec_id}'
 ),
-pol AS (
-  {pol_union(exec_id)}
-)
-SELECT
-  a.politica,
-  COUNT(*) AS usuarios,
-  ROUND(AVG(p.cur), 0) AS lim_actual,
-  ROUND(AVG(a.general_limit), 0) AS lim_final,
-  ROUND(AVG(SAFE_DIVIDE(a.general_limit, p.cur)), 2) AS mult,
-  ROUND(SUM(a.general_limit - p.cur), 0) AS exposicion
-FROM acc a
-JOIN pol p ON a.cid = p.cid AND a.EXECUTION_GROUP_ID = p.GRP
-GROUP BY 1
-ORDER BY usuarios DESC;"""
-
-def rating_sql(exec_id):
-    return f"""WITH acc AS (
+credit AS (
+  SELECT CAST(cus_cust_id AS STRING) AS cid, CREDIT_AMT
+  FROM `meli-bi-data.WHOWNER.BT_VU_CREDIT`
+  WHERE sit_site_id = 'MLB' AND CRD_PROD_DEF_TYPE_SK = 3 AND VALID_TO_DT = '2099-12-31'
+),
+joined AS (
   SELECT
-    CAST(CUS_CUST_ID AS STRING) AS cid,
-    EXECUTION_GROUP_ID,
-    CAST((SELECT elem.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) elem WHERE elem.NAME = 'POLITICA_ID' LIMIT 1) AS STRING) AS politica,
-    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME = 'INTERNAL_RATING_BEHAVIOR_TC' LIMIT 1) AS STRING) AS bhv,
-    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME = 'INTERNAL_RATING_UPSELL_TC' LIMIT 1) AS STRING) AS ups,
-    CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME = 'general_limit' LIMIT 1) AS FLOAT64) AS lim_fin
-  FROM `bq-cp-prd-o0b0uuv7cs2-furyid.campaign_schema.EOC_CAMPAIGN_EXECUTION_DETAIL`
-  WHERE EXECUTION_ID = '{exec_id}'
-),
-pol AS (
-  {pol_union(exec_id)}
+    a.politica, a.bhv, a.ups, a.lim_final,
+    COALESCE(a.lim_pre, c.CREDIT_AMT) AS lim_actual
+  FROM acc a
+  LEFT JOIN credit c ON a.cid = c.cid
+  WHERE a.politica IN {POLITICAS}
 )
-SELECT
-  a.politica,
-  a.bhv,
-  a.ups,
+SELECT 'METRICS' AS tipo, politica, CAST(NULL AS STRING) AS bhv, CAST(NULL AS STRING) AS ups,
   COUNT(*) AS usuarios,
-  ROUND(AVG(p.cur), 0) AS lim_actual,
-  ROUND(AVG(a.lim_fin), 0) AS lim_final,
-  ROUND(AVG(SAFE_DIVIDE(a.lim_fin, p.cur)), 3) AS mult
-FROM acc a
-JOIN pol p ON a.cid = p.cid AND a.EXECUTION_GROUP_ID = p.GRP
-WHERE a.bhv IS NOT NULL AND a.ups IS NOT NULL
-GROUP BY 1, 2, 3
-ORDER BY 1, 2, 3;"""
+  ROUND(AVG(lim_actual),0) AS lim_actual,
+  ROUND(AVG(lim_final),0) AS lim_final,
+  ROUND(AVG(SAFE_DIVIDE(lim_final,lim_actual)),2) AS mult,
+  ROUND(SUM(lim_final-lim_actual),0) AS exposicion
+FROM joined GROUP BY politica
+
+UNION ALL
+
+SELECT 'RATING' AS tipo, politica, bhv, ups,
+  COUNT(*) AS usuarios,
+  ROUND(AVG(lim_actual),0) AS lim_actual,
+  ROUND(AVG(lim_final),0) AS lim_final,
+  ROUND(AVG(SAFE_DIVIDE(lim_final,lim_actual)),3) AS mult,
+  CAST(NULL AS FLOAT64) AS exposicion
+FROM joined
+WHERE bhv IS NOT NULL AND ups IS NOT NULL
+GROUP BY politica, bhv, ups
+ORDER BY tipo, politica, bhv, ups;"""
 
 if __name__ == '__main__':
-    kind, exec_id = sys.argv[1], sys.argv[2]
-    print(metrics_sql(exec_id) if kind == 'metrics' else rating_sql(exec_id))
+    exec_id = sys.argv[1]
+    print(combined_sql(exec_id))
