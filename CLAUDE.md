@@ -15,7 +15,16 @@ tarea separada y explícita — nunca "ya que estamos, actualizamos las dos".
 
 Este repo tiene remoto en GitHub: https://github.com/nicolasagustinbattaglia-art/Grid_campanas
 (rama `master`, **público** — confirmado explícitamente por el dueño del proyecto, sabiendo que
-tiene lógica de negocio interna de MELI).
+tiene lógica de negocio interna de MELI). Tiene más de un colaborador con acceso de escritura
+(además del dueño, al menos `jmarquina`/Juan Maria Marquina) — no asumir que sos el único que
+puede haber tocado el repo.
+
+**🔒 Antes de arrancar CUALQUIER modificación a este tablero: `git fetch origin` y `git log
+origin/master --oneline` (o `git pull`) para chequear si hay commits nuevos que tu copia local
+no tiene.** Un compañero puede haber pusheado cambios (incluso del lado de Sellers) sin avisar
+en esta conversación. Si hay commits nuevos, traerlos primero (`git pull`/merge, nunca descartar
+con `reset --hard`) antes de empezar a editar — de lo contrario el próximo `file_new_version` a
+Grid puede pisar trabajo ajeno que ni sabías que existía.
 
 **Regla dura: cada cambio es un commit NUEVO. Nunca se reescribe ni se pisa el historial.**
 
