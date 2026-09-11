@@ -11,18 +11,28 @@ que los datos de Sellers (`POLICY_MAP_SELLERS`, bloques de Sellers en Killers/Hi
 **exactamente iguales** a la versión anterior. Si alguna vez hay que actualizar Sellers, es una
 tarea separada y explícita — nunca "ya que estamos, actualizamos las dos".
 
-## 📦 Control de versiones — commitear siempre
+## 📦 Control de versiones — SIEMPRE versión nueva, NUNCA pisar
 
 Este repo tiene remoto en GitHub: https://github.com/nicolasagustinbattaglia-art/Grid_campanas
 (rama `master`, **público** — confirmado explícitamente por el dueño del proyecto, sabiendo que
 tiene lógica de negocio interna de MELI).
 
+**Regla dura: cada cambio es un commit NUEVO. Nunca se reescribe ni se pisa el historial.**
+
+- **Prohibido:** `git commit --amend`, `git push --force` / `--force-with-lease`, `git rebase` sobre
+  commits ya pusheados, `git reset --hard` seguido de un commit "limpio", o cualquier operación que
+  reemplace un commit existente en vez de agregar uno arriba. Si algo salió mal en un commit
+  anterior, se corrige con un commit nuevo que lo arregla — no se reescribe el que ya existe.
 - **Commitear cada cambio lógico** antes de dar una tarea por terminada — nunca dejar `git status`
-  con cambios sueltos.
+  con cambios sueltos. Un commit por versión de simulación agregada, por fix, por feature — no
+  amontonar varios cambios no relacionados en un solo commit gigante.
 - **Pushear a `origin` solo cuando el usuario lo pida explícitamente** — el remoto está listo, pero
-  no hay que asumir push automático después de cada commit.
-- El HTML final también se sube a Grid (ver IDs abajo) — pero el commit a git es el que deja el
-  historial auditable de *qué* cambió y *por qué*.
+  no hay que asumir push automático después de cada commit. Una vez pusheado, un commit en
+  `master` es historia pública — no se toca.
+- El HTML final también se sube a Grid con `file_new_version: true` (**nunca** reemplazando la
+  versión actual sin bump) — mismo principio: versión nueva siempre, nunca se pisa la anterior.
+- El commit a git es el que deja el historial auditable de *qué* cambió y *por qué* — Grid guarda
+  versiones del archivo pero no el razonamiento detrás de cada cambio.
 
 ## 📖 Leer antes de cualquier cambio
 
