@@ -20,15 +20,19 @@ subir cambios de Individuos.
 
 ## 📦 Repositorio Git — control de versiones (leer si sos un Claude nuevo)
 
-Este proyecto vive en `/Users/nbattaglia/Documents/tablero-upsell/` y es un **repo git local**
-(sin remoto configurado). Cualquier sesión de Claude que trabaje acá — Simulaciones, Campañas,
-Historial, Killers, Resumen de Política, o cualquier archivo del repo — **tiene que commitear
-cada cambio** antes de dar la tarea por terminada.
+Este proyecto vive en `/Users/nbattaglia/Documents/tablero-upsell/` y es un **repo git con remoto
+en GitHub**: https://github.com/nicolasagustinbattaglia-art/Grid_campanas (rama `master`, repo
+**público** — el usuario lo confirmó explícitamente sabiendo que tiene lógica de negocio interna).
+Cualquier sesión de Claude que trabaje acá — Simulaciones, Campañas, Historial, Killers, Resumen
+de Política, o cualquier archivo del repo — **tiene que commitear cada cambio** antes de dar la
+tarea por terminada.
 
 - **Un commit por cambio lógico**, con mensaje descriptivo (qué se agregó/corrigió y por qué —
   ver `git log` para el estilo, ej. "Simulaciones: agrega v9 (7286) y v10 (7289)").
 - **Nunca dejar cambios sin commitear.** Antes de reportar algo como terminado, correr
   `git status` y confirmar que no queda nada suelto.
+- **Pushear a `origin` (GitHub) cuando el usuario lo pida explícitamente** — no asumir que hay
+  que pushear automáticamente después de cada commit, pero el remoto está configurado y listo.
 - El HTML final se sube a Grid (`doc_id: 01KVB1DRFMEQYZ4THQ3SGHM3AR`) con `file_new_version: true`
   — pero el commit a git es el que deja el historial auditable de *qué* cambió y *por qué*, algo
   que Grid solo no da (guarda versiones del archivo, no el razonamiento detrás).
@@ -1868,6 +1872,7 @@ problema de datos que se haya arreglado en algún momento.
 - **Dashboard:** `01KVB1DRFMEQYZ4THQ3SGHM3AR` → https://grid.adminml.com/d/01KVB1DRFMEQYZ4THQ3SGHM3AR/view
 - **Este instructivo:** `01KXGE5PEQ6EMZTB60B5NPG0HG` → https://grid.adminml.com/d/01KXGE5PEQ6EMZTB60B5NPG0HG/view
 - **Repo local:** `/Users/nbattaglia/Documents/tablero-upsell/` — HTML publicado, queries BQ (`queries/`), datos de simulaciones (`data/`) y README
+- **Repo en GitHub (remoto, público):** https://github.com/nicolasagustinbattaglia-art/Grid_campanas — rama `master`, historial completo de commits de este proyecto
 
 ---
 
