@@ -5,6 +5,38 @@ Reemplazá los valores entre `[CORCHETES]` antes de ejecutar.
 
 ---
 
+## 🔒 REGLA CRÍTICA — Individuos vs Sellers (leer antes de tocar nada)
+
+**Este dashboard SOLO se actualiza del lado de Individuos.** La sub-hoja/producto "Upsell Sellers"
+**no se toca** — ni se recalculan sus datos, ni se sube una versión que la modifique de paso al
+subir cambios de Individuos.
+
+- Antes de subir cualquier versión nueva del HTML a Grid, verificar que los datos de Sellers
+  (`POLICY_MAP_SELLERS`, los bloques de Sellers en Killers/Historial, etc.) hayan quedado
+  **exactamente igual** a la versión anterior. Si la tarea era sobre Individuos, un diff del
+  archivo no debería tocar esas líneas.
+- Si alguna vez hay que actualizar Sellers, es una tarea separada y explícita — nunca "ya que
+  estamos, actualizamos las dos".
+
+## 📦 Repositorio Git — control de versiones (leer si sos un Claude nuevo)
+
+Este proyecto vive en `/Users/nbattaglia/Documents/tablero-upsell/` y es un **repo git local**
+(sin remoto configurado). Cualquier sesión de Claude que trabaje acá — Simulaciones, Campañas,
+Historial, Killers, Resumen de Política, o cualquier archivo del repo — **tiene que commitear
+cada cambio** antes de dar la tarea por terminada.
+
+- **Un commit por cambio lógico**, con mensaje descriptivo (qué se agregó/corrigió y por qué —
+  ver `git log` para el estilo, ej. "Simulaciones: agrega v9 (7286) y v10 (7289)").
+- **Nunca dejar cambios sin commitear.** Antes de reportar algo como terminado, correr
+  `git status` y confirmar que no queda nada suelto.
+- El HTML final se sube a Grid (`doc_id: 01KVB1DRFMEQYZ4THQ3SGHM3AR`) con `file_new_version: true`
+  — pero el commit a git es el que deja el historial auditable de *qué* cambió y *por qué*, algo
+  que Grid solo no da (guarda versiones del archivo, no el razonamiento detrás).
+- Ver la sección **CHANGELOG** al final de este documento para el historial de cambios recientes
+  con su fecha y el porqué de cada uno.
+
+---
+
 ## ⚡ FLUJO COMPLETO EN UN SOLO PASO
 
 Cuando el analista pase el nombre de una campaña, Claude debe:
@@ -1400,8 +1432,8 @@ políticas de Individuos (ej. campañas "Competencia Individuos + Sellers"), cad
 ```js
 "[ID] — [etiqueta]": {
   ...campos normales (campaign_id, name, exec_id, eoc_url, es_original)...
-  group_name: "Individuos (9 políticas)",
-  politicas: ["BAU","JOURNEY 1A","VIP MP","PISOS","OPF","RIESGO MED. SOW","REACTIVACION","ACTIVACION","ADECUACION DE RENTA"],
+  group_name: "Individuos (9 políticas)",  // o "(10 políticas)" si esta versión trae VIP MKPL — chequear antes de copiar
+  politicas: ["BAU","JOURNEY 1A","VIP MP","PISOS","OPF","RIESGO MED. SOW","REACTIVACION","ACTIVACION","ADECUACION DE RENTA"],  // agregar "VIP MKPL" al final si corresponde
   metrics: { ... },   // TOTAL agregado: usuarios=suma, lim_actual/lim_final/mult=promedio ponderado por usuarios (misma fórmula que `totals()` en renderConsolidado de Historial)
   funnel:  { ... },   // TOTAL: sumas simples de las 9 políticas
   killers: [],        // vacío a propósito — no existe una cascada de killers combinada con sentido entre 9 políticas distintas
@@ -1431,18 +1463,33 @@ en qué modo están.
 
 **⚠ Trampa de datos — `EOC_CAMPAIGN_EXECUTION_DETAIL.ACTIONABLE_COLUMNS.POLITICA_ID` no siempre
 coincide con `processing_funnel.users_to_impact` / `campaign_dashboard.audience_by_group` que
-devuelve `get_campaign_execution_dashboard`.** Verificado en 3 campañas reales (7165, y también
-6816 — la campaña de **producción** de agosto, no solo simulaciones): 2 de las 9 políticas
-(ACTIVACION, VIP MP) siempre calzan exacto; las otras 7 (BAU, JOURNEY, OPF, PISOS, ADECUACION,
-REACTIVACION, RIESGO MED. SOW) quedan por debajo en la tabla BQ, entre 6% y 22%. La diferencia se
-va a las filas con `POLITICA_ID` en `NULL`/`BAU_PF_LT`/`BAU_PF_SMB`/`PISOS SELLERS` — son clientes
-duales (elegibles por Individuos y por su variante Sellers) que el export a BigQuery termina
-etiquetando con el policy_id de Sellers en vez del de Individuos.
+devuelve `get_campaign_execution_dashboard`, y para políticas nuevas puede no estar poblado.**
+Verificado en varias campañas reales (7165, 6816 de producción de agosto, y v12/7296 con la
+política nueva VIP MKPL): 2 de las 9 políticas originales (ACTIVACION, VIP MP) siempre calzan
+exacto contra `POLITICA_ID`; las otras 7 (BAU, JOURNEY, OPF, PISOS, ADECUACION, REACTIVACION,
+RIESGO MED. SOW) quedan por debajo, entre 6% y 22% — la diferencia se va a filas con `POLITICA_ID`
+en `NULL`/`BAU_PF_LT`/`BAU_PF_SMB`/`PISOS SELLERS` (clientes duales Individuos+Sellers mal
+etiquetados). **Para VIP MKPL (política nueva agregada en v12) el campo directamente viene NULL
+para el 100% de sus clientes** — no tiene código propio asignado todavía.
 
-**Cuál número es el correcto:** el de la tabla BQ (`POLITICA_ID`), no el del funnel de la API.
-Confirmado contra la pantalla de EOC "Detalle por grupo de procesamiento — Cantidad de usuarios
-**accionados**", que reproduce exacto los números de BQ. No usar `processing_funnel.users_to_impact`
-como fuente de verdad para el desglose por política en campañas con Individuos + Sellers mezclados.
+**✅ Fix robusto (usado desde v9 en adelante): agrupar por `EXECUTION_GROUP_ID`, no por
+`POLITICA_ID`.** El índice `-N` del `EXECUTION_GROUP_ID` (`[exec_id]-1`, `[exec_id]-2`, ...)
+corresponde siempre a la misma política, en el mismo orden, esté o no bien poblado
+`POLITICA_ID` — verificado que da números idénticos a los de `POLITICA_ID` para las 9 políticas
+que sí lo tienen bien poblado. El orden fijo de índice (confirmado estable en todas las versiones
+de septiembre):
+
+```
+-1 REACTIVACION   -2 OPF        -3 JOURNEY 1A       -4 PISOS   -5 ADECUACION DE RENTA
+-6 ACTIVACION     -7 BAU        -8 RIESGO MED. SOW  -9 VIP MP  -10 VIP MKPL (si existe)
+```
+
+**⚠ El número de políticas de Individuos cambia de versión a versión — nunca asumir 9.** v12
+(7296) sumó VIP MKPL (10 políticas); v13/v14/v15/v16 volvieron a 9 (sin VIP MKPL); v18/v18.2 la
+trajeron de vuelta. **Siempre chequear `len(processing_group_dashboard)` y los `group_name` de
+cada grupo antes de armar la query** — no copiar el número de la versión anterior a ciegas.
+`queries/sept2026/gen_sql.py` ya soporta esto: `combined_sql(exec_id, n_politicas)` recibe la
+cantidad de políticas como parámetro.
 
 **⚠ No usar `CAMP_EOC_POLICY` para traer el límite actual.** Es la tabla que devuelve
 `get_campaign_execution_dashboard` en su query de ejemplo ("New query Policy"), con
@@ -1453,19 +1500,21 @@ como fuente de verdad para el desglose por política en campañas con Individuos
 2. En la práctica devolvió `NULL` para el 100% de las filas al extraerlo (bug o gap no
    diagnosticado — no vale la pena insistir, el costo de depurarlo es el mismo ~320GB otra vez).
 
-**Fuente correcta y barata para el límite actual — `LIMITE_PRE_UPSELL` + fallback `BT_VU_CREDIT`:**
+**Fuente correcta y barata para el límite actual — `LIMITE_PRE_UPSELL` + fallback `BT_VU_CREDIT`,
+agrupado por `EXECUTION_GROUP_ID` (no por `POLITICA_ID`):**
 
 ```sql
 WITH acc AS (
   SELECT
     CAST(CUS_CUST_ID AS STRING) AS cid,
-    CAST((SELECT elem.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) elem WHERE elem.NAME='POLITICA_ID' LIMIT 1) AS STRING) AS politica,
+    EXECUTION_GROUP_ID,
     CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='general_limit' LIMIT 1) AS FLOAT64) AS lim_final,
     CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='LIMITE_PRE_UPSELL' LIMIT 1) AS FLOAT64) AS lim_pre,
     CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_BEHAVIOR_TC' LIMIT 1) AS STRING) AS bhv,
     CAST((SELECT e.VALUE FROM UNNEST(ACTIONABLE_COLUMNS) e WHERE e.NAME='INTERNAL_RATING_UPSELL_TC' LIMIT 1) AS STRING) AS ups
   FROM `bq-cp-prd-o0b0uuv7cs2-furyid.campaign_schema.EOC_CAMPAIGN_EXECUTION_DETAIL`
   WHERE EXECUTION_ID = '[EXEC_ID]'
+    AND EXECUTION_GROUP_ID IN ('[EXEC_ID]-1', '[EXEC_ID]-2', ..., '[EXEC_ID]-N')  -- N = cantidad real de políticas de Individuos de ESTA versión
 ),
 credit AS (
   SELECT CAST(cus_cust_id AS STRING) AS cid, CREDIT_AMT
@@ -1473,22 +1522,25 @@ credit AS (
   WHERE sit_site_id = 'MLB' AND CRD_PROD_DEF_TYPE_SK = 3 AND VALID_TO_DT = '2099-12-31'
 ),
 joined AS (
-  SELECT a.politica, a.bhv, a.ups, a.lim_final,
+  SELECT a.EXECUTION_GROUP_ID, a.bhv, a.ups, a.lim_final,
     COALESCE(a.lim_pre, c.CREDIT_AMT) AS lim_actual   -- LIMITE_PRE_UPSELL cubre BAU/JOURNEY/VIP_MP/REACTIVACION/ACTIVACION/SOW_RM/ADECUACION al 100%; PISOS y OPF SIEMPRE lo traen NULL, ahí cae al fallback de BT_VU_CREDIT
   FROM acc a LEFT JOIN credit c ON a.cid = c.cid
-  WHERE a.politica IN ('BAU','PISOS','OPF','VIP_MP','SOW_RM','REACTIVACION','ACTIVACION','JOURNEY','ADECUACION')
 )
--- de acá GROUP BY politica para métricas, y GROUP BY politica,bhv,ups (WHERE bhv/ups NOT NULL) para la matriz de ratings
+-- de acá GROUP BY EXECUTION_GROUP_ID para métricas, y GROUP BY EXECUTION_GROUP_ID,bhv,ups (WHERE bhv/ups NOT NULL) para la matriz de ratings
+-- después, en Python: mapear el índice -N de EXECUTION_GROUP_ID al nombre de política (ver orden fijo arriba)
 ```
+
+Usar directamente `queries/sept2026/gen_sql.py combined_sql(exec_id, n_politicas)` en vez de
+armar esta query a mano — ya implementa exactamente esto.
 
 Costo real: ~60-75GB por ejecución (dominado por el scan de `BT_VU_CREDIT`, no de
 `EOC_CAMPAIGN_EXECUTION_DETAIL`). Con 4 campañas eso es ~250-300GB en vez de los ~1,3TB que hubiera
 costado combinar métricas+matriz con `CAMP_EOC_POLICY` en las 4.
 
-**Mapeo de códigos cortos de política (BQ) → nombre de display (EOC/dashboard):**
-`BAU`→BAU · `JOURNEY`→JOURNEY 1A · `VIP_MP`→VIP MP · `PISOS`→PISOS · `OPF`→OPF ·
-`SOW_RM`→RIESGO MED. SOW · `REACTIVACION`→REACTIVACION · `ACTIVACION`→ACTIVACION ·
-`ADECUACION`→ADECUACION DE RENTA.
+**Mapeo de índice de grupo → nombre de display (EOC/dashboard):** ver el orden fijo de arriba
+(`-1 REACTIVACION` ... `-10 VIP MKPL`). Ya no hace falta mapear por código corto de `POLITICA_ID`
+(`BAU`, `JOURNEY`, `VIP_MP`, etc.) — ese mapeo queda solo como referencia histórica, no se usa en
+el flujo actual.
 
 **Reconciliar el funnel/killers con el `usuarios` validado de BQ:** el `excluded_by_policy` que
 devuelve la API queda desactualizado una vez que se reemplaza `users_to_impact` por el número de
@@ -1509,16 +1561,23 @@ después de la etapa de rules/killers, no la afecta.
 
 ### CHECKLIST — SIMULACIONES multi-política (condensador completo, no ADHOC)
 
-- [ ] `usuarios` por política validado contra `POLITICA_ID` de `EOC_CAMPAIGN_EXECUTION_DETAIL`,
-      **no** contra `processing_funnel.users_to_impact` de la API (ver trampa de datos arriba)
+- [ ] **Contar `len(processing_group_dashboard)` y revisar los `group_name` primero** — no asumir
+      9 políticas de Individuos, puede haber 10 (VIP MKPL) u otro número en versiones futuras
+- [ ] Métricas/matriz corridas agrupando por `EXECUTION_GROUP_ID` (no `POLITICA_ID` — ver trampa
+      de datos arriba, `POLITICA_ID` puede venir NULL para políticas nuevas)
 - [ ] `lim_actual` sacado de `LIMITE_PRE_UPSELL` con fallback a `BT_VU_CREDIT.CREDIT_AMT` para
-      PISOS/OPF — **nunca** de `CAMP_EOC_POLICY` (320GB y devuelve NULL)
-- [ ] `excluded_by_policy` recalculado como `ultimo_killer.accumulated − usuarios_bq` por política
-- [ ] `metrics`/`funnel` del nivel TOTAL de la versión = agregado de las 9 políticas (usuarios
-      suma, lim_actual/lim_final/mult promedio ponderado), `killers: []`
-- [ ] `politicas` y `por_politica` agregados a cada versión, mismo shape que una versión simple
+      PISOS/OPF (y probablemente cualquier política nueva) — **nunca** de `CAMP_EOC_POLICY`
+      (320GB y devuelve NULL)
+- [ ] `metrics`/`funnel` del nivel TOTAL de la versión = agregado de TODAS las políticas de esa
+      versión (usuarios suma, lim_actual/lim_final/mult promedio ponderado), `killers: []`
+- [ ] `politicas` y `por_politica` agregados a cada versión con la cantidad real de políticas,
+      mismo shape que una versión simple
 - [ ] jsdom: probar el grupo multi-política Y el grupo de una sola política (agosto ADHOC) — que
       ninguno de los dos se rompa con los cambios en `renderSimFunnel`/`renderSimMatrix`
+- [ ] jsdom: si la versión nueva tiene distinta cantidad de políticas que la anterior (ej. 10 vs
+      9), probar la comparación cruzada entre ambas (A con 10, B con 9) y confirmar que no tira
+      excepciones ni muestra `NaN`/`undefined` en la política que falta de un lado
+- [ ] `git commit` de `dashboard_eoc.html` + el `data/c[ID].json` crudo de la nueva versión
 
 ---
 
@@ -1695,6 +1754,70 @@ Reglas de armado:
 
 ---
 
+## ──────────────────────────────────────────
+## HOJA RESUMEN DE POLÍTICA
+## ──────────────────────────────────────────
+
+5ta sub-hoja de Upsell Individuos (agregada 2026-09-07). Muestra, para cada política, un párrafo
+en lenguaje llano de qué hace y a quién apunta, y debajo el detalle técnico completo (variables,
+fórmulas, secuencia exacta de excepciones) en una sección colapsable — pensada para que alguien sin
+contexto de EOC entienda la política, y quien lo necesite pueda bajar al detalle exacto.
+
+**No es una comparación entre políticas.** Se probó con un enfoque de "diferencias vs. ADECUACION
+DE RENTA como referencia" y se sacó a pedido del usuario — cada política se presenta como un
+objeto autónomo, sin comparar contra ninguna otra.
+
+### Estructura de datos (`POLICY_SUMMARIES` en el HTML)
+
+```js
+const POLICY_SUMMARIES = {
+  "[NOMBRE_CORTO]": {   // debe matchear una key de POLICY_MAP (ej. "ADECUACION", "BAU", "JOURNEY 1A")
+    policy_id: N,
+    policy_name: "[nombre completo en EOC]",
+    segmentacion: "[atributos de segmentación en texto]",
+    n_exceptions: N,
+    resumen_humano: "[párrafo en lenguaje llano, sin jerga técnica]",
+    pasos: [
+      {t: 'calc', d: "[qué calcula/ajusta este paso]"},   // t:'calc' = ajusta un parámetro
+      {t: 'kill', d: "[qué condición excluye]"},           // t:'kill' = excluye (POLICY_EXCLUDE)
+      // ... en el orden exacto de INDEX_EXCEPTION de la política
+    ],
+  },
+  // ... una entrada por política
+};
+```
+
+**Cómo se arma `pasos[]`:** con `get_policy_detail(policy_id)` de EOC — `attributes[]` da la
+segmentación, `settings[]` los parámetros por segmento, `exceptions[]` la secuencia (cada una con
+`conditions[]` y `parameter_modify` — si `parameter_modify` es `null` es un `kill`, si tiene
+contenido es un `calc`). El campo `name` de cada excepción viene `null` en la API — el nombre
+legible hay que inferirlo de la lógica de la condición (o copiarlo si coincide con un patrón ya
+documentado en otra política, ej. `EXCLUSION_LIM_RENTA`, `KILLER_UPSELL_INSUFFICIENT`).
+
+### ⚠ Gotcha de color — texto invisible en tarjetas oscuras
+
+El `body` global tiene `--text: #1a1a1a` (color de texto por defecto), y las tarjetas oscuras del
+dashboard usan `background:#1a1a1a` — **el mismo color**. Cualquier texto dentro de una tarjeta
+oscura que no fije un `color` explícito hereda ese default y queda invisible (texto oscuro sobre
+fondo oscuro), aunque el HTML generado sea perfectamente correcto — no se detecta con jsdom porque
+no evalúa contraste visual, solo que el DOM se arma bien. Se manifestó como "el título y el texto
+de los pasos no aparecen, pero los badges y los números sí" (los badges tenían `color` explícito).
+**Regla para cualquier nodo nuevo dentro de una tarjeta `#1a1a1a`: siempre fijar `color` explícito**
+(`#eee`/`#ccc`/`#ddd` según jerarquía), nunca confiar en el heredado.
+
+### Cómo agregar/actualizar una política
+
+1. `get_policy_detail(policy_id)` de EOC MCP — el resultado suele exceder el límite de tokens y
+   quedar guardado en un archivo; parsearlo con Python (`json.load`), no con `Read` línea por línea.
+2. Armar `resumen_humano` (prosa) y `pasos[]` (técnico) siguiendo el formato de arriba.
+3. Agregar la entrada a `POLICY_SUMMARIES` en el HTML.
+4. Validar con jsdom: cambiar `selResumenPol` a la política nueva/actualizada y confirmar que
+   `resumenBody` tiene contenido y no está vacío ni con texto invisible (chequear que los `<span>`
+   de texto tengan `color` explícito en el HTML generado).
+5. Subir a Grid + commitear a git.
+
+---
+
 ## Share of wallet (SOW)
 
 Es la métrica que gobierna la política de Riesgo Medio — su `POLITICA_ID` es literalmente `SOW_RM`.
@@ -1719,6 +1842,25 @@ Mide qué porción del ingreso del cliente cubre Meli con la TC:
 > Puede ser válido si el ingreso asumido subestima al cliente real, pero conviene revisarlo: es el
 > tipo de cosa que una campaña extra —hecha para ganar volumen relajando killers— amplifica sin que
 > nadie lo note.
+
+---
+
+## ⚠ Campos PII bloqueados en `CAMP_EOC_POLICY` (no confundir con dato faltante)
+
+`WANDA.ASSUMED_INCOME_L30D_AMT` y `BT_VU_ASSUMED_INCOME.ASSUMED_INCOME_AMT`, leídos vía
+`COLUMNS_VARIABLES_POLICY` de `CAMP_EOC_POLICY`, **dan 100% NULL siempre** — no es un tema de
+tiempo transcurrido ni de una ejecución vieja vs. nueva, son campos sensibles (`is_pii: true`) a
+los que esa tabla de auditoría **nunca da acceso**, ni recién ejecutada la campaña ni después.
+Confirmado comparando la misma consulta sobre una ejecución de agosto y una de septiembre: las dos
+100% NULL, sin ninguna diferencia entre fechas. Otros campos de la misma tabla (`GENERAL_LIMIT`,
+`NISE`, `ASSUMED_INCOME_SOURCE_TAG`) sí vienen poblados normalmente — el bloqueo es específico de
+estos dos montos de renta.
+
+**Si se necesita ese dato, buscarlo en la tabla origen** (`meli-bi-data.WHOWNER.BT_VU_ASSUMED_INCOME`,
+campo `ASSUMED_INCOME_AMT` directo — ahí sí es accesible), nunca en `CAMP_EOC_POLICY`. Un hallazgo
+previo (retractado) había interpretado el 100% NULL de `L30D_AMT` como "el dato venía roto hasta
+agosto" — no se pudo reproducir, y la explicación real es este bloqueo de acceso permanente, no un
+problema de datos que se haya arreglado en algún momento.
 
 ---
 
@@ -1760,3 +1902,48 @@ async def main():
 
 asyncio.run(main())
 ```
+
+---
+
+## ──────────────────────────────────────────
+## CHANGELOG — sesiones recientes
+## ──────────────────────────────────────────
+
+Historial de cambios de esta sesión de trabajo (todo commiteado en git, ver `git log` para el
+detalle línea por línea de cada archivo). Recordatorio: **todo esto es Individuos — Sellers no se
+tocó en ningún commit de esta lista.**
+
+**2026-09-07**
+- Nueva sub-hoja **Resumen de Política** (5ta de Individuos): prosa en lenguaje llano + detalle
+  técnico colapsable por política, confirmado vía `get_policy_detail` de EOC. Ver sección arriba.
+- Fix de un bug de color (texto invisible por heredar el mismo color que el fondo de la tarjeta) y
+  se sacó el enfoque de comparación contra ADECUACION DE RENTA como referencia — cada política
+  quedó como objeto autónomo.
+- Se agregó **v8 (7277)** a Simulaciones. Se corrigió `queries/sept2026/gen_sql.py`: dejó de usar
+  `SBOX_CREDITSSIGMA.CAMP_EOC_RK_POLICY_*` (tabla que dejó de poblarse después del 31/8 y que,
+  investigando el job history de BigQuery, nunca fue en realidad la fuente de las versiones de
+  septiembre) y pasó a usar `EOC_CAMPAIGN_EXECUTION_DETAIL` + fallback `BT_VU_CREDIT`.
+- Investigación extensa sobre la baja de ADECUACION DE RENTA (agosto→septiembre). El hallazgo de
+  "L30D_AMT venía NULL hasta agosto, se arregló en septiembre" **quedó retractado el 2026-09-08**
+  (ver sección de campos PII bloqueados arriba) — no se pudo reproducir, el campo simplemente no es
+  accesible nunca vía esa tabla. Re-investigado con fuentes accesibles: confirmado que, dentro de
+  la población con tag de renta verificada, `KILLER_SIN_INCREMENTO_INGRESO` pasó de excluir 66,4%
+  (agosto) a 92,0% (v8) — mucho más estricto justo con ese segmento.
+- Se trackearon en git `data/c7218.json` y `c7230.json` (v6/v5), que habían quedado sin commitear
+  desde que se cargaron.
+
+**2026-09-08 a 2026-09-10 — carga de versiones v9 a v18.2**
+- Se agregaron a Simulaciones: **v9 (7286), v10 (7289), v11 (7291), v12 (7296), v13 (7304), v14
+  (7305), v15 (7330), v16 (7338), v18 (7340), v18.2 (7347)** — mismo flujo cada vez (funnel/killers
+  de EOC + métricas/matriz de BigQuery), validado con jsdom antes de subir.
+- **v12 (7296) sumó una política nueva: VIP MKPL** (grupo de procesamiento -10, 10 políticas de
+  Individuos en vez de 9). Esto rompió el supuesto de `gen_sql.py` de agrupar por `POLITICA_ID`
+  (ese campo viene NULL para VIP MKPL) — se corrigió para agrupar por `EXECUTION_GROUP_ID` en su
+  lugar, más robusto y ya no depende de que EOC pueble bien un campo de texto libre. Ver sección
+  de la trampa de `POLITICA_ID` arriba para el detalle completo.
+- El número de políticas de Individuos **no es estable versión a versión**: v13/v14/v15/v16
+  volvieron a 9 (sin VIP MKPL), v18/v18.2 la trajeron de vuelta. Siempre contar los grupos de la
+  versión antes de asumir un número.
+- ADECUACION DE RENTA, que venía en mínimos de ~3-4K usuarios desde agosto (el tema investigado
+  arriba), empezó a recuperarse en estas últimas versiones: 11.622 (v18) → 13.081 (v18.2). Pendiente
+  de investigar el motivo puntual de esta recuperación si se necesita para el análisis.
