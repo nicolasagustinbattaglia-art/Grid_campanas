@@ -1,5 +1,8 @@
 # Tablero de Upsell — Dashboard EOC Condensador (TC MLB)
 
+> ⚠️ **Leer `CLAUDE.md` antes de tocar cualquier archivo** — regla crítica de Individuos/Sellers,
+> convención de git, y dónde está el flujo completo (`INSTRUCTIVO.md`).
+
 Dashboard HTML del Condensador EOC para Tarjeta de Crédito en Brasil. Vive en Grid y se actualiza
 mes a mes con los resultados de cada campaña.
 
@@ -7,6 +10,7 @@ mes a mes con los resultados de cada campaña.
 |---|---|
 | Dashboard | `01KVB1DRFMEQYZ4THQ3SGHM3AR` — [abrir](https://grid.adminml.com/d/01KVB1DRFMEQYZ4THQ3SGHM3AR/view) |
 | Instructivo de actualización | `01KXGE5PEQ6EMZTB60B5NPG0HG` — [abrir](https://grid.adminml.com/d/01KXGE5PEQ6EMZTB60B5NPG0HG/view) |
+| Repo en GitHub (remoto) | https://github.com/nicolasagustinbattaglia-art/Grid_campanas |
 
 ## Estructura del dashboard
 
@@ -15,7 +19,8 @@ UPSELL INDIVIDUOS  |  UPSELL SELLERS      ← nav de producto
   ├─ Campañas               ← comparación mes a mes (flujo mensual del instructivo)
   ├─ Simulaciones           ← comparación entre versiones de un experimento
   ├─ Historial de cambios   ← qué cambió mes a mes, declarado y verificado
-  └─ Killers                ← reglas duras y killers específicos por política
+  ├─ Killers                ← reglas duras y killers específicos por política
+  └─ Resumen de Política    ← qué hace cada política, en criollo + detalle técnico
 ```
 
 Las sub-hojas existen sólo dentro de **Upsell Individuos**. Al pasar a Sellers la barra desaparece.
