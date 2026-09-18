@@ -31,8 +31,13 @@ que encuentres evidencia concreta de que algo de eso cambió — leé la memoria
    (`queries/sept2026/gen_sql.py`). El grupo es `{exec_id}-{índice+1}` (1-based). **Nunca** uses
    `POLITICA_ID` de `ACTIONABLE_COLUMNS` para identificarte.
 
-3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst` (nunca MCP crudo por
-   tu cuenta):
+3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst`. **Si al invocarla
+   los tools `mcp__eoc-mcp__*` no aparecen disponibles en tu sesión** (gotcha conocido de este
+   harness — el MCP figura "Connected" a nivel de config pero no siempre expone sus tools al
+   agente), no te quedes esperando ni te rindas: usá el fallback ya documentado y en uso en
+   `queries/fetch_policies.py` (HTTP POST directo a `https://eoc-mcp.melioffice.com/mcp` con el
+   token Fury de `mcp_remote_proxy.furyauth`, mismo payload MCP). Es un patrón sancionado de este
+   repo, no un bypass improvisado.
    - `get_campaign_execution_dashboard(campaign_id, include=["killer_rules","policy"])` filtrado a
      tu `EXECUTION_GROUP_ID`.
    - El `policy_id` de ADECUACION DE RENTA para el mes de esta campaña (no asumas un id

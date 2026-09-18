@@ -1,0 +1,343 @@
+{
+  "campaign_id": 7371,
+  "campaign_name": "202609-MLB-CROSS-TC FULL-UPSELL-BAU-POLITICAS-CONDENSADOR",
+  "exec_id": "dd7b0b0f-66f4-4596-b272-850bf10e64d4",
+  "execution_group_id": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+  "execution_date": "2026-09-11T15:19:31Z",
+  "sent_by": "mbotta",
+  "group_name": "ADECUACION DE RENTA",
+  "universe": {
+    "site": "MLB",
+    "segment": "CROSS",
+    "subsegment": "TC - ACEPTADA",
+    "total_users": 21554811
+  },
+  "processing_funnel_group_level": {
+    "total_users": 21515295,
+    "excluded_by_rules": 19394949,
+    "excluded_by_policy": 2108655,
+    "users_to_impact": 11691
+  },
+  "control_group": {
+    "control_group_percent": 10,
+    "control_group_type": "percent",
+    "users_excluded_by_control_group": 0,
+    "users_to_impact_after_control_group": 11691
+  },
+  "campaign_level_competition": {
+    "audience_by_group_adecuacion": 11691,
+    "competencia_round1": {
+      "entry_name": "ADECUACION DE RENTA",
+      "entry_users": 8791,
+      "discarded_entry_users": 2900
+    },
+    "note": "users_to_impact del funnel (11691) es previo a la competencia cross-politica del condensador; audiencia final real (post-competencia, la que llega a EOC_CAMPAIGN_EXECUTION_DETAIL) = 7282"
+  },
+  "policy_id_current": 2960,
+  "policy_id_previous_memoria": 2720,
+  "policy_name_current": "202609-MLB-IND-TC-FULL-UPSELL-TEST COMBINADO-RENTA-ADECUACION-PS-1 | ",
+  "killer_rules_rk_top": [
+    {
+      "name": "K-TC-CUENTA_NO_ACTIVA",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 8362438,
+      "excluded_audience": 533,
+      "excluded_offer": 4819100,
+      "accumulated_users": 12981859
+    },
+    {
+      "name": "K-MLB-ANTIGUEDAD-TC-FULL-MENOR-120D",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 1543194,
+      "excluded_audience": 1801,
+      "excluded_offer": 5016100,
+      "accumulated_users": 8694374
+    },
+    {
+      "name": "K-TC-ATTEND_12_PCT",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 905908,
+      "excluded_audience": 4203,
+      "excluded_offer": 55652900,
+      "accumulated_users": 2120346
+    },
+    {
+      "name": "K-TC-LIMIT_ACTUAL_MENOR_500",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 879153,
+      "excluded_audience": 46,
+      "excluded_offer": 24400,
+      "accumulated_users": 7815221
+    },
+    {
+      "name": "K-FLAG_OVERDUE",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 698995,
+      "excluded_audience": 776,
+      "excluded_offer": 6364400,
+      "accumulated_users": 11745116
+    },
+    {
+      "name": "K-ENDEUDAMIENTO-SCR",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 673745,
+      "excluded_audience": 1471,
+      "excluded_offer": 10038200,
+      "accumulated_users": 10744011
+    },
+    {
+      "name": "K-MLB-360D-ULT-PIX-APUESTAS",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 653003,
+      "excluded_audience": 6123,
+      "excluded_offer": 48896900,
+      "accumulated_users": 5750324
+    },
+    {
+      "name": "K-30D_ULT_UPSELL_TC",
+      "type": "RULE_EXCLUDE",
+      "is_productive": true,
+      "excluded_users": 604363,
+      "excluded_audience": 11030,
+      "excluded_offer": 114635500,
+      "accumulated_users": 4861841
+    }
+  ],
+  "n_killer_rules_rk": 47,
+  "policy_exceptions_sequential": [
+    {
+      "name": "EXCLUSION_LIM_RENTA",
+      "type": "POLICY_EXCLUDE",
+      "excluded_users": 75809,
+      "accumulated_users": 1704709,
+      "excluded_offer": 904517000
+    },
+    {
+      "name": "KILLER_FLAG_RCI_CURRENT_MAYOR_RCI_BHV - CON OPTIN",
+      "type": "POLICY_EXCLUDE",
+      "excluded_users": 52845,
+      "accumulated_users": 1651864,
+      "excluded_offer": 213819500
+    },
+    {
+      "name": "KILLER_FLAG_RCI_CURRENT_MAYOR_RCI_BHV - SIN OPTIN",
+      "type": "POLICY_EXCLUDE",
+      "excluded_users": 256307,
+      "accumulated_users": 1395557,
+      "excluded_offer": 1069203200
+    },
+    {
+      "name": "KILLER_UPSELL_INSUFFICIENT",
+      "type": "POLICY_EXCLUDE",
+      "excluded_users": 757147,
+      "accumulated_users": 638410,
+      "excluded_offer": 5812370000
+    },
+    {
+      "name": "R - RENTA REAL",
+      "type": "POLICY_EXCLUDE",
+      "excluded_users": 626719,
+      "accumulated_users": 11691,
+      "excluded_offer": 3967734600
+    }
+  ],
+  "policy_diff_2720_vs_2960": {
+    "exceptions_removed_in_2960": [
+      "KILLER_SIN_INCREMENTO_INGRESO"
+    ],
+    "exceptions_added_in_2960": [],
+    "n_exceptions_2720": 40,
+    "n_exceptions_2960": 39,
+    "settings_segmentados_identicos": true,
+    "settings_fijos_identicos": true,
+    "created_by_2960": "nbattaglia",
+    "created_at_2960": "2026-09-08T17:35:15Z",
+    "approved_by_2960": "mbotta",
+    "approved_at_2960": "2026-09-10T13:22:42Z"
+  },
+  "segment_coverage_bhv_x_upsell_post_competencia": [
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": null,
+      "exposicion": "1.2527914E7",
+      "lim_actual": "7078.0",
+      "lim_final": "8798.0",
+      "mult": "1.3",
+      "tipo": "METRICS",
+      "ups": null,
+      "usuarios": "7282"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "A",
+      "exposicion": null,
+      "lim_actual": "8644.0",
+      "lim_final": "10548.0",
+      "mult": "1.267",
+      "tipo": "RATING",
+      "ups": "A",
+      "usuarios": "1517"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "A",
+      "exposicion": null,
+      "lim_actual": "7948.0",
+      "lim_final": "9833.0",
+      "mult": "1.281",
+      "tipo": "RATING",
+      "ups": "B",
+      "usuarios": "1889"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "A",
+      "exposicion": null,
+      "lim_actual": "6037.0",
+      "lim_final": "7820.0",
+      "mult": "1.322",
+      "tipo": "RATING",
+      "ups": "C",
+      "usuarios": "349"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "A",
+      "exposicion": null,
+      "lim_actual": "5574.0",
+      "lim_final": "6994.0",
+      "mult": "1.281",
+      "tipo": "RATING",
+      "ups": "D",
+      "usuarios": "16"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "B",
+      "exposicion": null,
+      "lim_actual": "7391.0",
+      "lim_final": "8868.0",
+      "mult": "1.324",
+      "tipo": "RATING",
+      "ups": "A",
+      "usuarios": "22"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "B",
+      "exposicion": null,
+      "lim_actual": "7799.0",
+      "lim_final": "9651.0",
+      "mult": "1.276",
+      "tipo": "RATING",
+      "ups": "B",
+      "usuarios": "639"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "B",
+      "exposicion": null,
+      "lim_actual": "6796.0",
+      "lim_final": "8555.0",
+      "mult": "1.292",
+      "tipo": "RATING",
+      "ups": "C",
+      "usuarios": "703"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "B",
+      "exposicion": null,
+      "lim_actual": "5189.0",
+      "lim_final": "6379.0",
+      "mult": "1.302",
+      "tipo": "RATING",
+      "ups": "D",
+      "usuarios": "159"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "C",
+      "exposicion": null,
+      "lim_actual": "9050.0",
+      "lim_final": "16650.0",
+      "mult": "1.838",
+      "tipo": "RATING",
+      "ups": "A",
+      "usuarios": "2"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "C",
+      "exposicion": null,
+      "lim_actual": "6902.0",
+      "lim_final": "8418.0",
+      "mult": "1.297",
+      "tipo": "RATING",
+      "ups": "B",
+      "usuarios": "146"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "C",
+      "exposicion": null,
+      "lim_actual": "6430.0",
+      "lim_final": "8096.0",
+      "mult": "1.316",
+      "tipo": "RATING",
+      "ups": "C",
+      "usuarios": "605"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "C",
+      "exposicion": null,
+      "lim_actual": "4846.0",
+      "lim_final": "6177.0",
+      "mult": "1.322",
+      "tipo": "RATING",
+      "ups": "D",
+      "usuarios": "606"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "D",
+      "exposicion": null,
+      "lim_actual": "6405.0",
+      "lim_final": "8126.0",
+      "mult": "1.338",
+      "tipo": "RATING",
+      "ups": "B",
+      "usuarios": "19"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "D",
+      "exposicion": null,
+      "lim_actual": "4758.0",
+      "lim_final": "6079.0",
+      "mult": "1.383",
+      "tipo": "RATING",
+      "ups": "C",
+      "usuarios": "195"
+    },
+    {
+      "EXECUTION_GROUP_ID": "dd7b0b0f-66f4-4596-b272-850bf10e64d4-5",
+      "bhv": "D",
+      "exposicion": null,
+      "lim_actual": "3781.0",
+      "lim_final": "4869.0",
+      "mult": "1.356",
+      "tipo": "RATING",
+      "ups": "D",
+      "usuarios": "415"
+    }
+  ]
+}

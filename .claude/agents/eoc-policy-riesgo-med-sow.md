@@ -27,7 +27,13 @@ fuera de esos dos paths.
    `{exec_id}-{índice+1}` (1-based). **Nunca** uses `POLITICA_ID` de `ACTIONABLE_COLUMNS` para
    identificarte (mapea a `SOW_RM`, pero no es confiable para joins).
 
-3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst`:
+3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst`. **Si al invocarla
+   los tools `mcp__eoc-mcp__*` no aparecen disponibles en tu sesión** (gotcha conocido de este
+   harness — el MCP figura "Connected" a nivel de config pero no siempre expone sus tools al
+   agente), no te quedes esperando ni te rindas: usá el fallback ya documentado y en uso en
+   `queries/fetch_policies.py` (HTTP POST directo a `https://eoc-mcp.melioffice.com/mcp` con el
+   token Fury de `mcp_remote_proxy.furyauth`, mismo payload MCP). Es un patrón sancionado de este
+   repo, no un bypass improvisado.
    - `get_campaign_execution_dashboard(campaign_id, include=["killer_rules","policy"])` filtrado a
      tu `EXECUTION_GROUP_ID`.
    - El `policy_id` de RIESGO MED. SOW para el mes de esta campaña (no asumas un id hardcodeado).

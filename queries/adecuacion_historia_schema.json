@@ -1,0 +1,20 @@
+[
+  {"name": "exec_id", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "campaign_id", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "campaign_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "mes", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "policy_id", "type": "INTEGER", "mode": "NULLABLE"},
+  {"name": "policy_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "execution_group_id", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "funnel", "type": "RECORD", "mode": "NULLABLE", "fields": [
+    {"name": "total_users", "type": "INTEGER", "mode": "NULLABLE"},
+    {"name": "excluded_by_rules", "type": "INTEGER", "mode": "NULLABLE"},
+    {"name": "excluded_by_policy", "type": "INTEGER", "mode": "NULLABLE"},
+    {"name": "users_to_impact", "type": "INTEGER", "mode": "NULLABLE"}
+  ]},
+  {"name": "killers", "type": "RECORD", "mode": "REPEATED", "fields": [
+    {"name": "name", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "excluded", "type": "INTEGER", "mode": "NULLABLE"},
+    {"name": "accumulated", "type": "INTEGER", "mode": "NULLABLE"}
+  ]}
+]

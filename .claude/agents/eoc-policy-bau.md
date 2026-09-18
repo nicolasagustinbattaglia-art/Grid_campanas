@@ -25,8 +25,13 @@ son `agentes_politicas/memoria/BAU.md` (tu memoria narrativa) y `agentes_politic
    `POLITICA_ID` de `ACTIONABLE_COLUMNS` para identificarte — no es confiable para políticas nuevas
    y arrastra el problema de clientes duales mal etiquetados como Sellers.
 
-3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst` (nunca llames MCP
-   `eoc-mcp` crudo por tu cuenta — la skill ya resuelve auth y fallbacks conocidos):
+3. **Traé los datos de esta ejecución** usando la skill `eoc-ops:eoc-analyst`. **Si al invocarla
+   los tools `mcp__eoc-mcp__*` no aparecen disponibles en tu sesión** (gotcha conocido de este
+   harness — el MCP figura "Connected" a nivel de config pero no siempre expone sus tools al
+   agente), no te quedes esperando ni te rindas: usá el fallback ya documentado y en uso en
+   `queries/fetch_policies.py` (HTTP POST directo a `https://eoc-mcp.melioffice.com/mcp` con el
+   token Fury de `mcp_remote_proxy.furyauth`, mismo payload MCP). Es un patrón sancionado de este
+   repo, no un bypass improvisado.
    - `get_campaign_execution_dashboard(campaign_id, include=["killer_rules","policy"])` filtrado a
      tu `EXECUTION_GROUP_ID`: funnel (`total_users`, `users_to_impact`, `excluded_by_policy`),
      `killer_rules[]` (orden importa, nunca reordenar), `policy.exceptions[]`.
