@@ -1,0 +1,17 @@
+[
+  {"name": "rule_id", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "rule_name", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "rule_type", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "state", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "formula", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "logical_operator", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "conditions", "type": "RECORD", "mode": "REPEATED", "fields": [
+    {"name": "alias", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "column", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "comparator", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "comparator_name", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "value", "type": "STRING", "mode": "NULLABLE"},
+    {"name": "is_pii", "type": "BOOLEAN", "mode": "NULLABLE"},
+    {"name": "condition_index", "type": "INTEGER", "mode": "NULLABLE"}
+  ]}
+]
